@@ -2,22 +2,22 @@
 
 // 公共助手函数
 
-if (!function_exists('__'))
-{
+use app\common\library\Email;
+
+if (!function_exists('__')) {
 
     /**
      * 获取语言变量值
-     * @param string    $name 语言变量名
-     * @param array     $vars 动态变量值
-     * @param string    $lang 语言
+     * @param string $name 语言变量名
+     * @param array $vars 动态变量值
+     * @param string $lang 语言
      * @return mixed
      */
     function __($name, $vars = [], $lang = '')
     {
         if (is_numeric($name) || !$name)
             return $name;
-        if (!is_array($vars))
-        {
+        if (!is_array($vars)) {
             $vars = func_get_args();
             array_shift($vars);
             $lang = '';
@@ -27,8 +27,7 @@ if (!function_exists('__'))
 
 }
 
-if (!function_exists('format_bytes'))
-{
+if (!function_exists('format_bytes')) {
 
     /**
      * 将字节转换为可读文本
@@ -46,8 +45,7 @@ if (!function_exists('format_bytes'))
 
 }
 
-if (!function_exists('datetime'))
-{
+if (!function_exists('datetime')) {
 
     /**
      * 将时间戳转换为日期时间
@@ -63,8 +61,7 @@ if (!function_exists('datetime'))
 
 }
 
-if (!function_exists('human_date'))
-{
+if (!function_exists('human_date')) {
 
     /**
      * 获取语义化时间
@@ -79,8 +76,7 @@ if (!function_exists('human_date'))
 
 }
 
-if (!function_exists('cdnurl'))
-{
+if (!function_exists('cdnurl')) {
 
     /**
      * 获取上传资源的CDN的地址
@@ -95,34 +91,28 @@ if (!function_exists('cdnurl'))
 }
 
 
-if (!function_exists('is_really_writable'))
-{
+if (!function_exists('is_really_writable')) {
 
     /**
      * 判断文件或文件夹是否可写
-     * @param	string $file 文件或目录
-     * @return	bool
+     * @param    string $file 文件或目录
+     * @return    bool
      */
     function is_really_writable($file)
     {
-        if (DIRECTORY_SEPARATOR === '/')
-        {
+        if (DIRECTORY_SEPARATOR === '/') {
             return is_writable($file);
         }
-        if (is_dir($file))
-        {
+        if (is_dir($file)) {
             $file = rtrim($file, '/') . '/' . md5(mt_rand());
-            if (($fp = @fopen($file, 'ab')) === FALSE)
-            {
+            if (($fp = @fopen($file, 'ab')) === FALSE) {
                 return FALSE;
             }
             fclose($fp);
             @chmod($file, 0777);
             @unlink($file);
             return TRUE;
-        }
-        elseif (!is_file($file) OR ( $fp = @fopen($file, 'ab')) === FALSE)
-        {
+        } elseif (!is_file($file) OR ($fp = @fopen($file, 'ab')) === FALSE) {
             return FALSE;
         }
         fclose($fp);
@@ -131,8 +121,7 @@ if (!function_exists('is_really_writable'))
 
 }
 
-if (!function_exists('rmdirs'))
-{
+if (!function_exists('rmdirs')) {
 
     /**
      * 删除文件夹
@@ -145,16 +134,14 @@ if (!function_exists('rmdirs'))
         if (!is_dir($dirname))
             return false;
         $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($dirname, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
+            new RecursiveDirectoryIterator($dirname, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        foreach ($files as $fileinfo)
-        {
+        foreach ($files as $fileinfo) {
             $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
             $todo($fileinfo->getRealPath());
         }
-        if ($withself)
-        {
+        if ($withself) {
             @rmdir($dirname);
         }
         return true;
@@ -162,8 +149,7 @@ if (!function_exists('rmdirs'))
 
 }
 
-if (!function_exists('copydirs'))
-{
+if (!function_exists('copydirs')) {
 
     /**
      * 复制文件夹
@@ -172,25 +158,19 @@ if (!function_exists('copydirs'))
      */
     function copydirs($source, $dest)
     {
-        if (!is_dir($dest))
-        {
+        if (!is_dir($dest)) {
             mkdir($dest, 0755);
         }
         foreach (
-        $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item
-        )
-        {
-            if ($item->isDir())
-            {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item
+        ) {
+            if ($item->isDir()) {
                 $sontDir = $dest . DS . $iterator->getSubPathName();
-                if (!is_dir($sontDir))
-                {
+                if (!is_dir($sontDir)) {
                     mkdir($sontDir);
                 }
-            }
-            else
-            {
+            } else {
                 copy($item, $dest . DS . $iterator->getSubPathName());
             }
         }
@@ -198,8 +178,7 @@ if (!function_exists('copydirs'))
 
 }
 
-if (!function_exists('mb_ucfirst'))
-{
+if (!function_exists('mb_ucfirst')) {
 
     function mb_ucfirst($string)
     {
@@ -208,8 +187,7 @@ if (!function_exists('mb_ucfirst'))
 
 }
 
-if (!function_exists('addtion'))
-{
+if (!function_exists('addtion')) {
 
     /**
      * 附加关联字段数据
@@ -222,31 +200,22 @@ if (!function_exists('addtion'))
         if (!$items || !$fields)
             return $items;
         $fieldsArr = [];
-        if (!is_array($fields))
-        {
+        if (!is_array($fields)) {
             $arr = explode(',', $fields);
-            foreach ($arr as $k => $v)
-            {
+            foreach ($arr as $k => $v) {
                 $fieldsArr[$v] = ['field' => $v];
             }
-        }
-        else
-        {
-            foreach ($fields as $k => $v)
-            {
-                if (is_array($v))
-                {
+        } else {
+            foreach ($fields as $k => $v) {
+                if (is_array($v)) {
                     $v['field'] = isset($v['field']) ? $v['field'] : $k;
-                }
-                else
-                {
+                } else {
                     $v = ['field' => $v];
                 }
                 $fieldsArr[$v['field']] = $v;
             }
         }
-        foreach ($fieldsArr as $k => &$v)
-        {
+        foreach ($fieldsArr as $k => &$v) {
             $v = is_array($v) ? $v : ['field' => $v];
             $v['display'] = isset($v['display']) ? $v['display'] : str_replace(['_ids', '_id'], ['_names', '_name'], $v['field']);
             $v['primary'] = isset($v['primary']) ? $v['primary'] : '';
@@ -258,37 +227,27 @@ if (!function_exists('addtion'))
         unset($v);
         $ids = [];
         $fields = array_keys($fieldsArr);
-        foreach ($items as $k => $v)
-        {
-            foreach ($fields as $m => $n)
-            {
-                if (isset($v[$n]))
-                {
+        foreach ($items as $k => $v) {
+            foreach ($fields as $m => $n) {
+                if (isset($v[$n])) {
                     $ids[$n] = array_merge(isset($ids[$n]) && is_array($ids[$n]) ? $ids[$n] : [], explode(',', $v[$n]));
                 }
             }
         }
         $result = [];
-        foreach ($fieldsArr as $k => $v)
-        {
-            if ($v['model'])
-            {
+        foreach ($fieldsArr as $k => $v) {
+            if ($v['model']) {
                 $model = new $v['model'];
-            }
-            else
-            {
+            } else {
                 $model = $v['name'] ? \think\Db::name($v['name']) : \think\Db::table($v['table']);
             }
             $primary = $v['primary'] ? $v['primary'] : $model->getPk();
             $result[$v['field']] = $model->where($primary, 'in', $ids[$v['field']])->column("{$primary},{$v['column']}");
         }
 
-        foreach ($items as $k => &$v)
-        {
-            foreach ($fields as $m => $n)
-            {
-                if (isset($v[$n]))
-                {
+        foreach ($items as $k => &$v) {
+            foreach ($fields as $m => $n) {
+                if (isset($v[$n])) {
                     $curr = array_flip(explode(',', $v[$n]));
 
                     $v[$fieldsArr[$n]['display']] = implode(',', array_intersect_key($result[$n], $curr));
@@ -300,29 +259,40 @@ if (!function_exists('addtion'))
 
 }
 
-if (!function_exists('var_export_short'))
+// 判断是否是奇数
+function isOdd($value)
 {
+    return !($value % 2 == 0);
+}
+
+// 判断是否是小
+function isSmall($value)
+{
+    $iValue = intval($value);
+    return $iValue < 6;
+}
+
+
+if (!function_exists('var_export_short')) {
 
     /**
      * 返回打印数组结构
-     * @param string $var   数组
+     * @param string $var 数组
      * @param string $indent 缩进字符
      * @return string
      */
     function var_export_short($var, $indent = "")
     {
-        switch (gettype($var))
-        {
+        switch (gettype($var)) {
             case "string":
                 return '"' . addcslashes($var, "\\\$\"\r\n\t\v\f") . '"';
             case "array":
                 $indexed = array_keys($var) === range(0, count($var) - 1);
                 $r = [];
-                foreach ($var as $key => $value)
-                {
+                foreach ($var as $key => $value) {
                     $r[] = "$indent    "
-                            . ($indexed ? "" : var_export_short($key) . " => ")
-                            . var_export_short($value, "$indent    ");
+                        . ($indexed ? "" : var_export_short($key) . " => ")
+                        . var_export_short($value, "$indent    ");
                 }
                 return "[\n" . implode(",\n", $r) . "\n" . $indent . "]";
             case "boolean":
@@ -332,4 +302,21 @@ if (!function_exists('var_export_short'))
         }
     }
 
+}
+if (!function_exists('sendMail')) {
+    function sendMail($receiver_address, $message, $subject = "无主题", $isHtml = false)
+    {
+        $email = new Email;
+        $result = $email
+            ->to($receiver_address)
+            ->subject($subject)
+            ->message($message, $isHtml)
+            ->send();
+        if ($result) {
+            return ['code' => 200, 'message' => 'success'];
+        } else {
+            trace('sendMail: 发送连续期邮件失败，失败原因：' . $email->getError(), 'error');
+            return ['code' => 500, 'message' => $email->getError()];
+        }
+    }
 }
