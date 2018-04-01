@@ -1,0 +1,17 @@
+.idea
+application/config.php
+application/database.php
+application/extra
+/nbproject/
+/thinkphp/
+/vendor/
+/runtime/*
+/addons/*
+/application/admin/command/Install/*.lock
+/public/assets/addons/*
+/public/uploads/*
+composer.lock
+*.log
+*.css.map
+!.gitkeep
+.env
