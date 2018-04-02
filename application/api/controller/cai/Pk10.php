@@ -29,7 +29,8 @@ class Pk10 extends Api
     private $testData = ['qihao' => 674230, 'reward_time' => '2018-04-01 21:07', 'yi' => '4', 'er' => '10', 'san' => '4', 'si' => '3', 'wu' => '6', 'liu' => '8', 'qi' => '5', 'ba' => '2', 'jiu' => '9', 'shi' => '1', 'total' => 17];
 
 
-    public function send_mail(){
+    public function send_mail()
+    {
         $time = time();
         $url = 'https://www.dy78.com/api/init.do?_t=' . $time;
         $header = [
@@ -49,9 +50,9 @@ class Pk10 extends Api
         $ql = QueryList::getInstance();
         $result = json_decode($ql->get($url, [], ['headers' => $header])->getHtml(), true);
         $money = $result['money'];
-        $message = $result['fullName'].' 当前余额：'.$money.'，token: '.$result['token'].'，lastLoginTime：'.$result['lastLoginTime'].'，serverTime：'.$result['serverTime'];
-        $subject = '当前余额：'.$money;
-        $data = sendMail($this->receiver_address,$message,$subject);
+        $message = $result['fullName'] . ' 当前余额：' . $money . '，token: ' . $result['token'] . '，lastLoginTime：' . $result['lastLoginTime'] . '，serverTime：' . $result['serverTime'];
+        $subject = '当前余额：' . $money;
+        $data = sendMail($this->receiver_address, $message, $subject);
         $this->success($data);
     }
 
@@ -197,12 +198,13 @@ class Pk10 extends Api
         ];
 //        $result = '';
 //        $resultArr = [];
-        $result = Http::post($url,$data,$options);
-        $resultArr = json_decode($result,true);
-        if(!$resultArr || !$resultArr['success']){
-//            // todo : 发送下注失败邮件通知
+        $result = Http::post($url, $data, $options);
+        $resultArr = json_decode($result, true);
+        $message = '多盈下注提交的参数为：' . json_encode($data) . ' 返回的结果为：' . $result;
+        if (!$resultArr || !$resultArr['success']) {
+            sendMail($this->receiver_address, $message, $qihao . '期下注失败');
         }
-        trace('多盈下注提交的参数为：' . json_encode($data) . ' 返回的结果为：' . $result, 'error');
+        trace($message, 'error');
         return $resultArr;
     }
 
