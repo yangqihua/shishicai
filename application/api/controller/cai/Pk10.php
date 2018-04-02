@@ -17,8 +17,9 @@ class Pk10 extends Api
 {
 
     private $isDebug = true;
+    private $baseMoney = 1;   // 表示以1为底
     private $xiazhuCount = 5;   // 表示第五把要下注了
-    private $xiazhuLength = 3;  // 表示连根3把放弃
+    private $xiazhuLength = 4;  // 表示连根4把放弃
     private $cookie = 'PHPSESSID=ntsri95d4h9u04s745r3b3nkk4; PHPSESSID=ntsri95d4h9u04s745r3b3nkk4';
     private $receiver_address = '904693433@qq.com';
     protected $noNeedLogin = ['*'];
@@ -26,6 +27,34 @@ class Pk10 extends Api
     private $map = ['yi', 'er', 'san', 'si', 'wu', 'liu', 'qi', 'ba', 'jiu', 'shi',];
     private $huiheMap = ['total' => '冠亚之和', 'yi' => '冠军', 'er' => '亚军', 'san' => '第三名', 'si' => '第四名', 'wu' => '第五名', 'liu' => '第六名', 'qi' => '第七名', 'ba' => '第八名', 'jiu' => '第九名', 'shi' => '第十名',];
     private $testData = ['qihao' => 674230, 'reward_time' => '2018-04-01 21:07', 'yi' => '4', 'er' => '10', 'san' => '4', 'si' => '3', 'wu' => '6', 'liu' => '8', 'qi' => '5', 'ba' => '2', 'jiu' => '9', 'shi' => '1', 'total' => 17];
+
+
+    public function send_mail(){
+        $time = time();
+        $url = 'https://www.dy78.com/api/init.do?_t=' . $time;
+        $header = [
+            ':authority' => 'www.dy78.com',
+            ':method' => 'GET',
+            ':path' => '/api/init.do?_t=' . $time,
+            ':scheme' => 'https',
+            'accept' => 'application/json, text/plain, */*',
+            'accept-encoding' => 'gzip, deflate, br',
+            'accept-language' => 'zh-CN,zh;q=0.9,en;q=0.8',
+            'cache-control' => 'no-cache',
+            'cookie' => 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; x-session-token=AFqU8eHXlDMl8PFD%2FUbkjt6US0fz8FLI6Gwy0zXp8lzHTZPSIiqpuw%3D%3D;',
+            'origin' => 'https://www.dy78.com',
+            'referer' => 'https://www.dy78.com/game/',
+            'user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+        ];
+        $ql = QueryList::getInstance();
+        $result = json_decode($ql->get($url, [], ['headers' => $header])->getHtml(), true);
+        $money = $result['money'];
+        $message = $result['fullName'].' 当前余额：'.$money.'，token: '.$result['token'].'，lastLoginTime：'.$result['lastLoginTime'].'，serverTime：'.$result['serverTime'];
+        $subject = '当前余额：'.$money;
+        $data = sendMail($this->receiver_address,$message,$subject);
+        $this->success($data);
+    }
+
 
     public function cron_get_history()
     {
@@ -115,7 +144,7 @@ class Pk10 extends Api
     public function xiazhu_duoyin($wei, $type, $repeat_num = 5, $qihao)
     {
         trace('期号：' . $qihao . $wei . '位连出：' . $repeat_num . '次', 'error');
-        $money = pow(2, ($repeat_num - $this->xiazhuCount));
+        $money = pow(2, ($repeat_num - $this->xiazhuCount)) * $this->baseMoney;
         $cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; x-session-token=AFqU8eHXlDMl8PFD%2FUbkjt6US0fz8FLI6Gwy0zXp8lzHTZPSIiqpuw%3D%3D;';
         $index = array_search($wei, $this->map);
         $playId = 5011 + $index;
@@ -166,13 +195,13 @@ class Pk10 extends Api
             CURLOPT_COOKIE => $cookie,
             CURLOPT_HTTPHEADER => $header
         ];
-        $result = '';
-        $resultArr = [];
-//        $result = Http::post($url,$data,$options);
-//        $resultArr = json_decode($result,true);
-//        if(!$resultArr || !$resultArr['success']){
+//        $result = '';
+//        $resultArr = [];
+        $result = Http::post($url,$data,$options);
+        $resultArr = json_decode($result,true);
+        if(!$resultArr || !$resultArr['success']){
 //            // todo : 发送下注失败邮件通知
-//        }
+        }
         trace('多盈下注提交的参数为：' . json_encode($data) . ' 返回的结果为：' . $result, 'error');
         return $resultArr;
     }
