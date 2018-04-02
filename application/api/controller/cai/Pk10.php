@@ -6,6 +6,7 @@ use app\admin\model\PkHuihe;
 use app\admin\model\PkLost;
 use app\admin\model\PkResult;
 use app\common\controller\Api;
+use fast\Http;
 use QL\QueryList;
 use think\Db;
 
@@ -16,20 +17,19 @@ class Pk10 extends Api
 {
 
     private $isDebug = true;
-    private $xiazhuCount = 8;
+    private $xiazhuCount = 5;   // 表示第五把要下注了
+    private $xiazhuLength = 3;  // 表示连根3把放弃
     private $cookie = 'PHPSESSID=ntsri95d4h9u04s745r3b3nkk4; PHPSESSID=ntsri95d4h9u04s745r3b3nkk4';
     private $receiver_address = '904693433@qq.com';
     protected $noNeedLogin = ['*'];
     protected $noNeedRight = ['*'];
     private $map = ['yi', 'er', 'san', 'si', 'wu', 'liu', 'qi', 'ba', 'jiu', 'shi',];
     private $huiheMap = ['total' => '冠亚之和', 'yi' => '冠军', 'er' => '亚军', 'san' => '第三名', 'si' => '第四名', 'wu' => '第五名', 'liu' => '第六名', 'qi' => '第七名', 'ba' => '第八名', 'jiu' => '第九名', 'shi' => '第十名',];
-
-
     private $testData = ['qihao' => 674230, 'reward_time' => '2018-04-01 21:07', 'yi' => '4', 'er' => '10', 'san' => '4', 'si' => '3', 'wu' => '6', 'liu' => '8', 'qi' => '5', 'ba' => '2', 'jiu' => '9', 'shi' => '1', 'total' => 17];
 
     public function cron_get_history()
     {
-        $item = $this->getData(2430, 2449);
+        $item = $this->getData(2320, 2359);
 //        $item = $this->testData;
         if (!$item) {
             // todo: 爬取数据出错处理
@@ -54,7 +54,8 @@ class Pk10 extends Api
     public function cron_get_data()
     {
 //        $item = $this->getOneRecentData();
-        $item = $this->testData;
+//        $item = $this->testData;
+        $item = $this->get_duoyin_data();
         if (!$item) {
             // todo: 爬取数据出错处理
         }
@@ -62,20 +63,127 @@ class Pk10 extends Api
         $resultModel = new PkResult();
         $old = $resultModel->where(['qihao' => $item['qihao']])->find();
         if (!$old) {
-            $resultModel->save($item);
             foreach ($this->huiheMap as $key => $value) {
                 if ($key != 'total') {
                     $this->checkHuihe($item, $key);
                 }
             }
+            $resultModel->save($item);
         }
+        $this->success('cron_get_data success');
     }
 
-    // 在这个函数里面调用函数下注
-    private function checkHuihe($item, $type = 'total')
+    public function get_duoyin_data()
     {
-        $isLianxu = $this->checkLianxu($item);
+        $time = time();
+        $url = 'https://www.dy78.com/static/data/50CurIssue.json?_t=' . $time;
+        $header = [
+            ':authority' => 'www.dy78.com',
+            ':method' => 'GET',
+            ':path' => 'static/data/50CurIssue.json?_t=' . $time,
+            ':scheme' => 'https',
+            'accept' => 'application/json, text/plain, */*',
+            'accept-encoding' => 'gzip, deflate, br',
+            'accept-language' => 'zh-CN,zh;q=0.9,en;q=0.8',
+            'cache-control' => 'no-cache',
+            'cookie' => 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; x-session-token=pYGMhBTi28dDhlnwVoRi4kdWJ2vq9H3R3TMc1QJXnP%2BIBk3%2FrkyCqg%3D%3D',
+            'origin' => 'https://www.dy78.com',
+            'referer' => 'https://www.dy78.com/game/',
+            'user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+        ];
+        $ql = QueryList::getInstance();
+        $result = json_decode($ql->get($url, [], ['headers' => $header])->getHtml(), true);
+        $nums = explode(',', $result['nums']);
+        $dataModel['qihao'] = $result['issue'];
+        $dataModel['reward_time'] = $result['opentime'];
+        for ($j = 0; $j < count($nums); $j++) {
+            $column = $this->map[$j];
+            $dataModel[$column] = preg_replace('/^0+/', '', $nums[$j]);
+        }
+        return $dataModel;
+//        $this->success('', $dataModel);
+    }
+
+    /**
+     * @param $wei = 下哪一位  yi er san ...
+     * @param $type = 1 代表大，2代表小，3代表单，4代表双
+     * @param int $repeat_num
+     * @param $qihao
+     * @return mixed|string
+     * @internal param $ |int $repeat_num 重复了多少次
+     */
+    public function xiazhu_duoyin($wei, $type, $repeat_num = 5, $qihao)
+    {
+        trace('期号：' . $qihao . $wei . '位连出：' . $repeat_num . '次', 'error');
+        $money = pow(2, ($repeat_num - $this->xiazhuCount));
+        $cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; x-session-token=AFqU8eHXlDMl8PFD%2FUbkjt6US0fz8FLI6Gwy0zXp8lzHTZPSIiqpuw%3D%3D;';
+        $index = array_search($wei, $this->map);
+        $playId = 5011 + $index;
+        switch ($type) {
+            case 1:  // 大
+                $playId .= '01';
+                break;
+            case 2:  // 小
+                $playId .= '02';
+                break;
+            case 3:  // 单
+                $playId .= '03';
+                break;
+            case 4:  // 双
+                $playId .= '04';
+                break;
+        }
+        $data = [
+            'betBean[0].playId' => $playId,
+            'betBean[0].money' => $money,
+            'gameId' => 50,
+            'turnNum' => $qihao,
+            'totalNums' => 1,
+            'totalMoney' => $money,
+            'betSrc' => 0,
+        ];
+
+        $time = time();
+        $url = 'https://www.dy78.com/bet/bet.do?_t=' . $time;
+        $header = [
+            ':authority' => 'www.dy78.com',
+            ':method' => 'POST',
+            ':path' => '/bet/bet.do?_t=' . $time,
+            ':scheme' => 'https',
+            'accept' => 'application/json, text/plain, */*',
+            'accept-encoding' => 'gzip, deflate, br',
+            'accept-language' => 'zh-CN,zh;q=0.9,en;q=0.8',
+            'cache-control' => 'no-cache',
+            'content-length' => '110',
+            'content-type' => 'application/x-www-form-urlencoded',
+            'cookie' => $cookie,
+            'origin' => 'https://www.dy78.com',
+            'pragma' => 'no-cache',
+            'referer' => 'https://www.dy78.com/game/',
+            'user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+        ];
+        $options = [
+            CURLOPT_COOKIE => $cookie,
+            CURLOPT_HTTPHEADER => $header
+        ];
+        $result = '';
+        $resultArr = [];
+//        $result = Http::post($url,$data,$options);
+//        $resultArr = json_decode($result,true);
+//        if(!$resultArr || !$resultArr['success']){
+//            // todo : 发送下注失败邮件通知
+//        }
+        trace('多盈下注提交的参数为：' . json_encode($data) . ' 返回的结果为：' . $result, 'error');
+        return $resultArr;
+    }
+
+
+    // 在这个函数里面调用函数下注
+    private function checkHuihe($item, $type = 'yi')
+    {
         $xiazhuCount = $this->xiazhuCount;
+        $xiazhuLength = $this->xiazhuLength;
+        $isLianxu = $this->checkLianxu($item);
         $huiheModel = new PkHuihe();
         $wei = $this->huiheMap[$type];
         $weiValue = $item[$type];
@@ -92,8 +200,8 @@ class Pk10 extends Api
                 // update 如果上一次连出了单
                 if ($lastType == '单') {
                     // todo: 到达一定次数下注
-                    if ($xiazhuCount <= ($weidsold['repeat_num'] + 1) && !$this->isDebug) {
-                        $xiazhuResult = $this->xiazhu($wei, 4, intval($item['qihao']) + 1);
+                    if ($xiazhuCount <= ($weidsold['repeat_num'] + 1) && ($weidsold['repeat_num'] + 1) < ($xiazhuCount + $xiazhuLength) && !$this->isDebug) {
+                        $this->xiazhu_duoyin($type, 4, ($weidsold['repeat_num'] + 1), intval($item['qihao']) + 1);
                     }
                     $huiheModel->where('id', $weidsold['id'])->update([
                         'qihaos' => $weidsold['qihaos'] . ',' . $item['qihao'] . '(' . $weiValue . ')',
@@ -124,8 +232,8 @@ class Pk10 extends Api
                 // update
                 if ($lastType == '双') {
                     // todo: 到达一定次数下注
-                    if ($xiazhuCount <= ($weidsold['repeat_num'] + 1) && !$this->isDebug) {
-                        $xiazhuResult = $this->xiazhu($wei, 3, intval($item['qihao']) + 1);
+                    if ($xiazhuCount <= ($weidsold['repeat_num'] + 1) && ($weidsold['repeat_num'] + 1) < ($xiazhuCount + $xiazhuLength) && !$this->isDebug) {
+                        $this->xiazhu_duoyin($type, 3, ($weidsold['repeat_num'] + 1), intval($item['qihao']) + 1);
                     }
                     $huiheModel->where('id', $weidsold['id'])->update([
                         'qihaos' => $weidsold['qihaos'] . ',' . $item['qihao'] . '(' . $weiValue . ')',
@@ -160,8 +268,8 @@ class Pk10 extends Api
                 // update
                 if ($lastType == '小') {
                     // todo: 到达一定次数下注
-                    if ($xiazhuCount <= ($weidxold['repeat_num'] + 1) && !$this->isDebug) {
-                        $xiazhuResult = $this->xiazhu($wei, 1, intval($item['qihao']) + 1);
+                    if ($xiazhuCount <= ($weidxold['repeat_num'] + 1) && ($weidxold['repeat_num'] + 1) < ($xiazhuCount + $xiazhuLength) && !$this->isDebug) {
+                        $this->xiazhu_duoyin($type, 1, ($weidxold['repeat_num'] + 1), intval($item['qihao']) + 1);
                     }
                     $huiheModel->where('id', $weidxold['id'])->update([
                         'qihaos' => $weidxold['qihaos'] . ',' . $item['qihao'] . '(' . $weiValue . ')',
@@ -191,8 +299,8 @@ class Pk10 extends Api
                 // update
                 if ($lastType == '大') {
                     // todo: 到达一定次数下注
-                    if ($xiazhuCount <= ($weidxold['repeat_num'] + 1) && !$this->isDebug) {
-                        $xiazhuResult = $this->xiazhu($wei, 2, intval($item['qihao']) + 1);
+                    if ($xiazhuCount <= ($weidxold['repeat_num'] + 1) && ($weidxold['repeat_num'] + 1) < ($xiazhuCount + $xiazhuLength) && !$this->isDebug) {
+                        $this->xiazhu_duoyin($type, 2, ($weidxold['repeat_num'] + 1), intval($item['qihao']) + 1);
                     }
                     $huiheModel->where('id', $weidxold['id'])->update([
                         'qihaos' => $weidxold['qihaos'] . ',' . $item['qihao'] . '(' . $weiValue . ')',
