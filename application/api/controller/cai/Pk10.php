@@ -29,7 +29,7 @@ class Pk10 extends Api
 
     public function cron_get_history()
     {
-        $item = $this->getData(2520, 2549);
+        $item = $this->getData(2430, 2449);
 //        $item = $this->testData;
         if (!$item) {
             // todo: 爬取数据出错处理

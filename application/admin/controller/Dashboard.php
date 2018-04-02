@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\PkHuihe;
 use app\common\controller\Backend;
 use think\Config;
 
@@ -14,42 +15,27 @@ use think\Config;
 class Dashboard extends Backend
 {
 
+    private $huiheMap = ['yi' => '冠军', 'er' => '亚军', 'san' => '第三名', 'si' => '第四名', 'wu' => '第五名', 'liu' => '第六名', 'qi' => '第七名', 'ba' => '第八名', 'jiu' => '第九名', 'shi' => '第十名',];
     /**
      * 查看
      */
     public function index()
     {
-        $seventtime = \fast\Date::unixtime('day', -7);
-        $paylist = $createlist = [];
-        for ($i = 0; $i < 7; $i++)
-        {
-            $day = date("Y-m-d", $seventtime + ($i * 86400));
-            $createlist[$day] = mt_rand(20, 200);
-            $paylist[$day] = mt_rand(1, mt_rand(1, $createlist[$day]));
-        }
-        $hooks = config('addons.hooks');
-        $uploadmode = isset($hooks['upload_config_init']) && $hooks['upload_config_init'] ? implode(',', $hooks['upload_config_init']) : 'local';
-        $addonComposerCfg = ROOT_PATH . '/vendor/karsonzhang/fastadmin-addons/composer.json';
-        Config::parse($addonComposerCfg, "json", "composer");
-        $config = Config::get("composer");
-        $addonVersion = isset($config['version']) ? $config['version'] : __('Unknown');
-        $this->view->assign([
-            'totaluser'        => 35200,
-            'totalviews'       => 219390,
-            'totalorder'       => 32143,
-            'totalorderamount' => 174800,
-            'todayuserlogin'   => 321,
-            'todayusersignup'  => 430,
-            'todayorder'       => 2324,
-            'unsettleorder'    => 132,
-            'sevendnu'         => '80%',
-            'sevendau'         => '32%',
-            'paylist'          => $paylist,
-            'createlist'       => $createlist,
-            'addonversion'       => $addonVersion,
-            'uploadmode'       => $uploadmode
-        ]);
 
+        $resultList = [];
+        $huiheModel = new PkHuihe();
+        $dataList = $huiheModel->select();
+        foreach ($dataList as $key => $item){
+            $qiString = $item['qihaos'];
+            $qihaoArr = explode(',',$qiString);
+            $resultItem = [];
+            for($i=0;$i<count($qihaoArr);$i++){
+                $qihao = preg_replace('/\(.*?\)/', '', $qihaoArr[$i]);
+                $resultList[$qihao][$item['wei']][$item['type']] = $i+1;
+            }
+//            $resultList[] = $resultItem;
+        }
+        $this->view->assign(['resultList'=>$resultList]);
         return $this->view->fetch();
     }
 
