@@ -6,6 +6,7 @@ use app\admin\model\PkHuihe;
 use app\admin\model\PkLost;
 use app\admin\model\PkResult;
 use app\common\controller\Api;
+use app\common\model\Config;
 use fast\Http;
 use QL\QueryList;
 use think\Db;
@@ -21,6 +22,7 @@ class Pk10 extends Api
     private $xiazhuCount = 5;   // 表示第五把要下注了
     private $xiazhuLength = 4;  // 表示连根4把放弃
     private $cookie = 'PHPSESSID=ntsri95d4h9u04s745r3b3nkk4; PHPSESSID=ntsri95d4h9u04s745r3b3nkk4';
+    private $duoyin_cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; _skin_=blue; x-session-token=znJ0eZnwe%2BDuBn%2BrOOON8TcKYGxwaHosaEFMaXVYF%2Fef2R6Hw6RHVQ%3D%3D';
     private $receiver_address = '904693433@qq.com';
     protected $noNeedLogin = ['*'];
     protected $noNeedRight = ['*'];
@@ -59,8 +61,9 @@ class Pk10 extends Api
 
     public function cron_get_history()
     {
+        $config = new Config();
+        $this->duoyin_cookie = $config->where("name", "duoyin_cookie")->find() ? $config->where("name", "duoyin_cookie")->find()['value'] : $this->duoyin_cookie;
         $item = $this->getData(2320, 2359);
-//        $item = $this->testData;
         if (!$item) {
             // todo: 爬取数据出错处理
             $this->error('爬取数据出错处理');
@@ -146,7 +149,7 @@ class Pk10 extends Api
     {
         trace('期号：' . $qihao . $wei . '位连出：' . $repeat_num . '次', 'error');
         $money = pow(2, ($repeat_num - $this->xiazhuCount)) * $this->baseMoney;
-        $cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; _skin_=blue; x-session-token=znJ0eZnwe%2BDuBn%2BrOOON8TcKYGxwaHosaEFMaXVYF%2Fef2R6Hw6RHVQ%3D%3D';
+        $cookie = $this->duoyin_cookie;
         $index = array_search($wei, $this->map);
         $playId = 5011 + $index;
         switch ($type) {
