@@ -146,7 +146,7 @@ class Pk10 extends Api
     {
         trace('期号：' . $qihao . $wei . '位连出：' . $repeat_num . '次', 'error');
         $money = pow(2, ($repeat_num - $this->xiazhuCount)) * $this->baseMoney;
-        $cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; x-session-token=AFqU8eHXlDMl8PFD%2FUbkjt6US0fz8FLI6Gwy0zXp8lzHTZPSIiqpuw%3D%3D;';
+        $cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; _skin_=blue; x-session-token=znJ0eZnwe%2BDuBn%2BrOOON8TcKYGxwaHosaEFMaXVYF%2Fef2R6Hw6RHVQ%3D%3D';
         $index = array_search($wei, $this->map);
         $playId = 5011 + $index;
         switch ($type) {
