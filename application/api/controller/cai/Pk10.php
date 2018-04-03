@@ -16,7 +16,7 @@ use think\Db;
 class Pk10 extends Api
 {
 
-    private $isDebug = true;
+    private $isDebug = false;
     private $baseMoney = 1;   // 表示以1为底
     private $xiazhuCount = 5;   // 表示第五把要下注了
     private $xiazhuLength = 4;  // 表示连根4把放弃
