@@ -88,6 +88,7 @@ class Pk10 extends Api
     {
 //        $item = $this->getOneRecentData();
 //        $item = $this->testData;
+        $config = new Config();
         $this->duoyin_cookie = $config->where("name", "duoyin_cookie")->find() ? $config->where("name", "duoyin_cookie")->find()['value'] : $this->duoyin_cookie;
         $item = $this->get_duoyin_data();
         if (!$item) {
