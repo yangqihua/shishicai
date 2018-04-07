@@ -100,7 +100,8 @@ class Pk10 extends Api
         $old = $resultModel->where(['qihao' => $item['qihao']])->find();
         if (!$old) {
             foreach ($this->huiheMap as $key => $value) {
-                if ($key != 'total') {
+//                if ($key != 'total') {
+                if ($key == 'yi') {
                     $this->checkHuihe($item, $key);
                 }
             }
