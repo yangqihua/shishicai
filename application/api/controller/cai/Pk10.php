@@ -18,9 +18,9 @@ class Pk10 extends Api
 {
 
     private $isDebug = false;
-    private $baseMoney = 2;   // 表示以1为底
-    private $xiazhuCount = 8;   // 表示第五把要下注了
-    private $xiazhuLength = 4;  // 表示连根4把放弃
+    private $baseMoney = 1;   // 表示以1为底
+    private $xiazhuCount = 1;   // 表示第五把要下注了
+    private $xiazhuLength = 3;  // 表示连根4把放弃
     private $cookie = 'PHPSESSID=ntsri95d4h9u04s745r3b3nkk4; PHPSESSID=ntsri95d4h9u04s745r3b3nkk4';
     private $duoyin_cookie = 'JSESSIONID=aaaEs5okegqkp-kyv7ckw; _skin_=blue; x-session-token=znJ0eZnwe%2BDuBn%2BrOOON8TcKYGxwaHosaEFMaXVYF%2Fef2R6Hw6RHVQ%3D%3D';
     private $receiver_address = '904693433@qq.com';
