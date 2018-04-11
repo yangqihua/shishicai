@@ -7,6 +7,8 @@ use app\common\controller\Api;
 class Milltor extends Api
 {
 
+    protected $noNeedLogin = ['*'];
+    protected $noNeedRight = ['*'];
     private $receiver_address = '904693433@qq.com';
 
     public function send_mail()
