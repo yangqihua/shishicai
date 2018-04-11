@@ -17,8 +17,8 @@ class Milltor extends Api
         $email = input('email', 'no email');
         $subject = input('email', 'no subject');
         $message = $name . '的邮箱: ' . $email . '，发来信息: ' . input('email', 'no message');
-//        $data = sendMail($this->receiver_address, $message, $subject);
-        $data = ['code'=>200,'message'=>'success'];
+        $data = sendMail($this->receiver_address, $message, $subject);
+//        $data = ['code'=>200,'message'=>'success'];
         $this->success($data);
     }
 }
