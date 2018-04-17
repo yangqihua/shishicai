@@ -75,17 +75,21 @@ class Analysis extends Backend
         return json($js);
     }
 
+    /**
+     * '%Y-%m-%d %H:%i:%S'
+     * @return \think\response\Json
+     */
     public function get_one_day()
     {
         $result = [];
 
-        $sql = 'SELECT FROM_UNIXTIME(createtime, \'%Y-%m-%d\') as create_time,count(FROM_UNIXTIME(createtime, \'%Y-%m-%d\')) as total FROM shishicai.pk_huihe group by create_time;';
+        $sql = 'SELECT FROM_UNIXTIME(createtime, \'%Y-%m-%d %H\') as create_time,count(FROM_UNIXTIME(createtime, \'%Y-%m-%d\')) as total FROM shishicai.pk_huihe group by create_time;';
         $res = Db::query($sql);
         foreach ($res as $row) {
             $result[$row['create_time']] = ['total_num' => $row['total']];
         }
 
-        $sql = 'SELECT FROM_UNIXTIME(createtime, \'%Y-%m-%d\') as create_time,count(FROM_UNIXTIME(createtime, \'%Y-%m-%d\')) as total,repeat_num FROM shishicai.pk_huihe where repeat_num=1 group by create_time,repeat_num;';
+        $sql = 'SELECT FROM_UNIXTIME(createtime, \'%Y-%m-%d %H\') as create_time,count(FROM_UNIXTIME(createtime, \'%Y-%m-%d\')) as total,repeat_num FROM shishicai.pk_huihe where repeat_num=1 group by create_time,repeat_num;';
         $res = Db::query($sql);
         $total_reward = 0;
         foreach ($res as $row) {
