@@ -154,7 +154,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     "type": "bar",
                     "label": {
                         "normal": {
-                            "show": true,
+                            "show": false,
                             // "formatter": (function() {
                             //     return ' {c}%';
                             // })(),
