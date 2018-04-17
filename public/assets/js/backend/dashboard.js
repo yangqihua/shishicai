@@ -149,7 +149,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     "scale": true
                 }],
                 "series": [{
-                    "barWidth": 50,
+                    "barWidth": 80,
                     "name": "中奖金额",
                     "type": "bar",
                     "label": {
