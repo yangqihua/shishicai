@@ -46,9 +46,128 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                 }
                 dxSeries.push(dxSerie)
             }
-            console.log('lengend:',lengend)
-            console.log('qihaos:',qihaos)
-            console.log('dxSeries:',dsSeries)
+
+            var rewardChart = Echarts.init(document.getElementById('reward_echart'));
+
+            var rewardData = reward['result']
+            var rewardTime = [];
+            var rewardMoney = [];
+            for (var key in rewardData) {
+                rewardTime.push(key);
+                rewardMoney.push(rewardData[key]['reward']);
+            }
+
+
+            var rewardOption = {
+                calculable: true,
+                title: {
+                    text: '中奖统计',
+                    textStyle: {
+                        color: '#27C24C',
+                        fontSize: '16'
+                    },
+                },
+                "toolbox": {
+                    "feature": {
+                        "saveAsImage": {
+                            "show": true,
+                            "title": "保存为图片",
+                            "type": "png",
+                            "lang": ["点击保存"]
+                        },
+                        "dataView": {
+                            "show": true,
+                            "title": "数据视图",
+                            "readOnly": false,
+                            "lang": ["数据视图", "关闭", "刷新"]
+                        },
+                        "magicType": {
+                            "show": true,
+                            "title": {
+                                "bar": "柱形图切换",
+                                "stack": "堆积",
+                                "tiled": "平铺",
+                                "line": "折线图切换"
+                            },
+                            "type": ["line", "bar"]
+                        },
+                        "restore": {
+                            "show": true,
+                            "title": "还原"
+                        }
+                    },
+                    "show": true,
+                    "left": "82%"
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ["中奖金额"]
+                },
+                dataZoom: [
+                    {
+                        "xAxisIndex": [
+                            0
+                        ],
+                        bottom: 30,
+                        "start": 0,
+                        "end": 100,
+                        handleIcon: 'path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z',
+                        handleSize: '110%',
+                        handleStyle: {
+                            color: "#aaa",
+                        },
+                        textStyle: {
+                            color: "#27C24C"
+                        },
+                        borderColor: "#aaa"
+                    },
+                    {
+                        "type": "inside",
+                        "show": true,
+                        // "height": 15,
+                        "start": 30,
+                        "end": 100
+                    }
+                ],
+                grid: {
+                    "left": "10%",
+                    "right": "10%",
+                    "bottom": "15%"
+                },
+                xAxis: [{
+                    "type": "category",
+                    "data":rewardTime
+                }],
+                "yAxis": [{
+                    "type": "value",
+                    "name": "中奖金额",
+                    "splitArea": {
+                        "show": true
+                    },
+                    "scale": true
+                }],
+                "series": [{
+                    "barWidth": 50,
+                    "name": "中奖金额",
+                    "type": "bar",
+                    "label": {
+                        "normal": {
+                            "show": true,
+                            // "formatter": (function() {
+                            //     return ' {c}%';
+                            // })(),
+                            "position": "top"
+                        }
+                    },
+                    "data": rewardMoney
+                }]
+            };
+
+            rewardChart.setOption(rewardOption);
+
+
 
             var inventoryChart = Echarts.init(document.getElementById('first_echart'));
             var inventoryOption = {
