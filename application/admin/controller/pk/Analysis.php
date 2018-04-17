@@ -8,7 +8,7 @@ use \think\Db;
 
 class Analysis extends Backend
 {
-    protected $rate = 0.985;
+    protected $rate = 0.995;
     protected $max_num = 12;
     protected $rowdata = null;
 
