@@ -89,8 +89,8 @@ class Analysis extends Backend
         $res = Db::query($sql);
         foreach ($res as $row) {
             $result[$row['create_time']]['yi_num'] = $row['total'];
+            $result[$row['create_time']]['reward'] = $row['total']*2*$this->rate-$result[$row['create_time']]['total_num'];
         }
-
         return json($result);
     }
 
