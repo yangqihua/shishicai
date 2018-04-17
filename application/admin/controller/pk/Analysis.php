@@ -87,11 +87,15 @@ class Analysis extends Backend
 
         $sql = 'SELECT FROM_UNIXTIME(createtime, \'%Y-%m-%d\') as create_time,count(FROM_UNIXTIME(createtime, \'%Y-%m-%d\')) as total,repeat_num FROM shishicai.pk_huihe where repeat_num=1 group by create_time,repeat_num;';
         $res = Db::query($sql);
+        $total_reward = 0;
         foreach ($res as $row) {
             $result[$row['create_time']]['yi_num'] = $row['total'];
-            $result[$row['create_time']]['reward'] = $row['total']*2*$this->rate-$result[$row['create_time']]['total_num'];
+            $result[$row['create_time']]['reward'] = $row['total'] * 2 * $this->rate - $result[$row['create_time']]['total_num'];
+            $total_reward += $row['total'] * 2 * $this->rate - $result[$row['create_time']]['total_num'];
         }
-        return json($result);
+        $data['result'] = $result;
+        $data['total_reward'] = $total_reward;
+        return json($data);
     }
 
 
