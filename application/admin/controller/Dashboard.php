@@ -46,7 +46,7 @@ class Dashboard extends Backend
     {
         $result = [];
 
-        $fmt = "'%Y-%m-%d %H'";
+        $fmt = "'%Y-%m-%d'";
 
         $sql = "SELECT FROM_UNIXTIME(createtime, $fmt) as create_time,count(FROM_UNIXTIME(createtime, $fmt)) as total FROM shishicai.pk_huihe group by create_time;";
         $res = Db::query($sql);
