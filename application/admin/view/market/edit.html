@@ -1,0 +1,76 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label for="c-quote_volume" class="control-label col-xs-12 col-sm-2">{:__('Quote_volume')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-quote_volume" class="form-control" name="row[quote_volume]" type="text" value="{$row.quote_volume}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-base_volume" class="control-label col-xs-12 col-sm-2">{:__('Base_volume')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-base_volume" class="form-control" name="row[base_volume]" type="text" value="{$row.base_volume}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-highest_bid" class="control-label col-xs-12 col-sm-2">{:__('Highest_bid')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-highest_bid" class="form-control" name="row[highest_bid]" type="text" value="{$row.highest_bid}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-high24hr" class="control-label col-xs-12 col-sm-2">{:__('High24hr')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-high24hr" class="form-control" name="row[high24hr]" type="text" value="{$row.high24hr}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-last" class="control-label col-xs-12 col-sm-2">{:__('Last')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-last" class="form-control" name="row[last]" type="text" value="{$row.last}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-lowest_ask" class="control-label col-xs-12 col-sm-2">{:__('Lowest_ask')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-lowest_ask" class="form-control" name="row[lowest_ask]" type="text" value="{$row.lowest_ask}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-elapsed" class="control-label col-xs-12 col-sm-2">{:__('Elapsed')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-elapsed" class="form-control" name="row[elapsed]" type="text" value="{$row.elapsed}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-result" class="control-label col-xs-12 col-sm-2">{:__('Result')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-result" class="form-control" name="row[result]" type="text" value="{$row.result}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-low24hr" class="control-label col-xs-12 col-sm-2">{:__('Low24hr')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-low24hr" class="form-control" name="row[low24hr]" type="text" value="{$row.low24hr}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-percent_change" class="control-label col-xs-12 col-sm-2">{:__('Percent_change')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-percent_change" class="form-control" name="row[percent_change]" type="text" value="{$row.percent_change}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-create_time" class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{$row.create_time|datetime}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
