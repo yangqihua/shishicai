@@ -28,7 +28,7 @@ class Market extends Model
 
     public function getCreateTimeTextAttr($value, $data)
     {
-        $value = $value ? $value : $data['create_time'];
+        $value = $value ? $value : $data['createtime'];
         return is_numeric($value) ? date("Y-m-d H:i:s", $value) : $value;
     }
 
