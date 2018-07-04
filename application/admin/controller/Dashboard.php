@@ -36,6 +36,7 @@ class Dashboard extends Backend
 //            }
 //        }
 
+
         $data = $this->get_one_day();
         $this->view->assign(['resultList'=>$resultList,'reward'=>$data]);
         return $this->view->fetch();
