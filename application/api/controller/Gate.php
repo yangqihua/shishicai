@@ -75,6 +75,12 @@ class Gate extends Api
                     $data['bcex_vol'] = $item['vol'];  //24小时交易货币交易量
                     $data['bcex_base_volume'] = $item['base_volume'];
                     $data['bcex_change_daily'] = $item['change_daily'];
+                } else if ($item['market'] == 'uex') {
+                    $data['uex_last'] = $this->num($item['last']);
+                }else if ($item['market'] == 'coinoah') {
+                    $data['coinoah_last'] = $this->num($item['last']);
+                }else if ($item['market'] == 'hotbit') {
+                    $data['hotbit_last'] = $this->num($item['last']);
                 }
             }
         }
