@@ -37,8 +37,17 @@ class Dashboard extends Backend
 //        }
 
 
-        $data = $this->get_one_day();
-        $this->view->assign(['resultList'=>$resultList,'reward'=>$data]);
+        $result = Db::table('block')->column('createtime,gate_last,bcex_last,uex_last,coinoah_last,hotbit_last');
+        $marketList = [];
+        foreach ($result as $item){
+            $marketList['time'][] = date('Y-m-d H:i:s',$item['createtime']);
+            $marketList['gate'][] = $item['gate_last'];
+            $marketList['bcex'][] = $item['bcex_last'];
+            $marketList['uex'][] = $item['uex_last'];
+            $marketList['coinoah'][] = $item['coinoah_last'];
+            $marketList['hotbit'][] = $item['hotbit_last'];
+        }
+        $this->view->assign(['marketList'=>$marketList]);
         return $this->view->fetch();
     }
 
