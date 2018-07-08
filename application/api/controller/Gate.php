@@ -47,7 +47,7 @@ class Gate extends Api
             'createtime' => time()
         ];
 
-        $latest = $this->marketModel->order('id desc')->limit(20)->select();
+        $latest = $this->marketModel->order('id desc')->limit(30)->select();
         $total = 0;
         foreach ($latest as $item) {
             $total += $item['last'];
@@ -59,10 +59,11 @@ class Gate extends Api
             if (count($result['orders']) < 15) {
                 // 就可以下单买卖了
                 $buyRate = $data['last'];
-                $saleRate = $data['last'] * (1 + rand(1, 4) / 100);
+                $saleRate = $data['last'] * (1 + rand(1, 3) / 100);
                 $amount = 800;
                 $buyRes = $this->gateLib->buy('rating_usdt', $buyRate, $amount);
                 $sellRes = $this->gateLib->sell('rating_usdt', $saleRate, $amount);
+                trace('买入价格：' . $buyRate . ',卖出价格：' . $saleRate, 'error');
                 $gateOrder = [
                     'buy_rate' => $buyRate, 'sell_rate' => $saleRate,
                     'order_count' => $amount,
