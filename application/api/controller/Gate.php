@@ -3,6 +3,7 @@
 namespace app\api\controller;
 
 use app\admin\model\Block;
+use app\admin\model\GateOrder;
 use app\admin\model\Market;
 use app\common\controller\Api;
 use app\common\library\GateLib;
@@ -52,19 +53,28 @@ class Gate extends Api
             $total += $item['last'];
         }
         $av = $total / count($latest);
+//        $data['last'] = '0.00347';
         if ($data['last'] < $av) {
             $result = $this->gateLib->open_orders('rating_usdt');
             if (count($result['orders']) < 15) {
                 // 就可以下单买卖了
                 $buyRate = $data['last'];
-                $saleRate = $data['last'] * (1 + rand(1, 5) / 100);
-                $amount = 3000;
+                $saleRate = $data['last'] * (1 + rand(1, 4) / 100);
+                $amount = 800;
                 $buyRes = $this->gateLib->buy('rating_usdt', $buyRate, $amount);
                 $sellRes = $this->gateLib->sell('rating_usdt', $saleRate, $amount);
+                $gateOrder = [
+                    'buy_rate'=>$buyRate,'sell_rate'=>$saleRate,
+                    'order_count'=>$amount,
+                    'sell_order_number'=>$sellRes['orderNumber'],
+                    'buy_order_number'=>$buyRes['orderNumber'],
+                    'order_status'=>'未成交',
+                ];
+                $gateModel = new GateOrder();
+                $gateModel->save($gateOrder);
             }
         }
         $this->marketModel->save($data);
-
         return json(['data' => 'ok']);
     }
 
