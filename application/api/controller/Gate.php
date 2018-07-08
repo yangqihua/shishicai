@@ -56,7 +56,7 @@ class Gate extends Api
         trace('平均价格：' . $av . ',当前价格：' . $data['last'], 'error');
         if ($data['last'] < $av) {
             $result = $this->gateLib->open_orders('rating_usdt');
-            if (count($result['orders']) < 15) {
+            if (count($result['orders']) < 20) {
                 // 就可以下单买卖了
                 $buyRate = $data['last'];
                 $saleRate = $data['last'] * (1 + rand(1, 3) / 100);
