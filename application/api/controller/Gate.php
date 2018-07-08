@@ -45,12 +45,41 @@ class Gate extends Api
             'percent_change' => $result['percentChange'],
             'createtime' => time()
         ];
+
+        $latest = $this->marketModel->order('id desc')->limit(20)->select();
+        $total = 0;
+        foreach ($latest as $item) {
+            $total += $item['last'];
+        }
+        $av = $total / count($latest);
+        if ($data['last'] < $av) {
+            $result = $this->gateLib->open_orders('rating_usdt');
+            if (count($result['orders']) < 15) {
+                // 就可以下单买卖了
+                $buyRate = $data['last'];
+                $saleRate = $data['last'] * (1 + rand(1, 5) / 100);
+                $amount = 3000;
+                $buyRes = $this->gateLib->buy('rating_usdt', $buyRate, $amount);
+                $sellRes = $this->gateLib->sell('rating_usdt', $saleRate, $amount);
+            }
+        }
         $this->marketModel->save($data);
+
         return json(['data' => 'ok']);
     }
 
+    private function buy_gate($buyRate, $amount)
+    {
+    }
 
-    public function get_uex_and_gate(){
+    private function sale_gate()
+    {
+
+    }
+
+
+    public function get_uex_and_gate()
+    {
 //        return json(['data'=>$result]);
     }
 
@@ -82,9 +111,9 @@ class Gate extends Api
                     $data['bcex_change_daily'] = $item['change_daily'];
                 } else if ($item['market'] == 'uex') {
                     $data['uex_last'] = $this->num($item['last']);
-                }else if ($item['market'] == 'coinoah') {
+                } else if ($item['market'] == 'coinoah') {
                     $data['coinoah_last'] = $this->num($item['last']);
-                }else if ($item['market'] == 'hotbit') {
+                } else if ($item['market'] == 'hotbit') {
                     $data['hotbit_last'] = $this->num($item['last']);
                 }
             }
@@ -95,13 +124,13 @@ class Gate extends Api
     }
 
 
-    private function num($num, $double = 8){
-        if(false !== stripos($num, "e")){
-            $a = explode("e",strtolower($num));
+    private function num($num, $double = 8)
+    {
+        if (false !== stripos($num, "e")) {
+            $a = explode("e", strtolower($num));
             return bcmul($a[0], bcpow(10, $a[1], $double), $double);
         }
     }
-
 
 
 }
