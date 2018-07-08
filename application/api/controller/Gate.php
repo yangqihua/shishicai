@@ -49,6 +49,14 @@ class Gate extends Api
         return json(['data' => 'ok']);
     }
 
+
+    public function get_uex_and_gate(){
+        $sign = md5('country86mobile18428360735passwordyqh199411211time'.time());
+        $url = '/open/api/get_ticker?symbol=rating&sign='.$sign;
+        $result = Http::get($url);
+        return json(['data'=>$result]);
+    }
+
     public function get_block()
     {
         $url = 'https://data.block.cc/api/v1/tickers?symbol=rating';
