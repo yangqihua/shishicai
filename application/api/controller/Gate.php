@@ -47,33 +47,32 @@ class Gate extends Api
             'createtime' => time()
         ];
 
-        $latest = $this->marketModel->order('id desc')->limit(20)->select();
-        $total = 0;
-        foreach ($latest as $item) {
-            $total += $item['last'];
-        }
-        $av = $total / count($latest);
-//        $data['last'] = '0.00347';
-        if ($data['last'] < $av) {
-            $result = $this->gateLib->open_orders('rating_usdt');
-            if (count($result['orders']) < 15) {
-                // 就可以下单买卖了
-                $buyRate = $data['last'];
-                $saleRate = $data['last'] * (1 + rand(1, 4) / 100);
-                $amount = 800;
-                $buyRes = $this->gateLib->buy('rating_usdt', $buyRate, $amount);
-                $sellRes = $this->gateLib->sell('rating_usdt', $saleRate, $amount);
-                $gateOrder = [
-                    'buy_rate'=>$buyRate,'sell_rate'=>$saleRate,
-                    'order_count'=>$amount,
-                    'sell_order_number'=>$sellRes['orderNumber'],
-                    'buy_order_number'=>$buyRes['orderNumber'],
-                    'order_status'=>'未成交',
-                ];
-                $gateModel = new GateOrder();
-                $gateModel->save($gateOrder);
-            }
-        }
+//        $latest = $this->marketModel->order('id desc')->limit(20)->select();
+//        $total = 0;
+//        foreach ($latest as $item) {
+//            $total += $item['last'];
+//        }
+//        $av = $total / count($latest);
+//        if ($data['last'] < $av) {
+//            $result = $this->gateLib->open_orders('rating_usdt');
+//            if (count($result['orders']) < 15) {
+//                // 就可以下单买卖了
+//                $buyRate = $data['last'];
+//                $saleRate = $data['last'] * (1 + rand(1, 4) / 100);
+//                $amount = 800;
+//                $buyRes = $this->gateLib->buy('rating_usdt', $buyRate, $amount);
+//                $sellRes = $this->gateLib->sell('rating_usdt', $saleRate, $amount);
+//                $gateOrder = [
+//                    'buy_rate'=>$buyRate,'sell_rate'=>$saleRate,
+//                    'order_count'=>$amount,
+//                    'sell_order_number'=>$sellRes['orderNumber'],
+//                    'buy_order_number'=>$buyRes['orderNumber'],
+//                    'order_status'=>'未成交',
+//                ];
+//                $gateModel = new GateOrder();
+//                $gateModel->save($gateOrder);
+//            }
+//        }
         $this->marketModel->save($data);
         return json(['data' => 'ok']);
     }
