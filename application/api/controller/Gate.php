@@ -68,7 +68,8 @@ class Gate extends Api
             while (!$bcexRes && $tryCount++ < 5) {
                 $bcexRes = $this->order_bcex('sale', $sell_price, $count);
             }
-            if ($bcexRes) {
+            $bRes = json_decode($bcexRes,true);
+            if ($bcexRes && is_array($bRes) && $bRes['code']==0) {
                 $gateRes = json_encode($this->gateLib->buy('rating_eth', $buy_price, $count));
                 trace('bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes, 'error');
             }
@@ -78,7 +79,8 @@ class Gate extends Api
             while (!$bcexRes && $tryCount++ < 5) {
                 $bcexRes = $this->order_bcex('buy', $buy_price, $count);
             }
-            if ($bcexRes) {
+            $bRes = json_decode($bcexRes,true);
+            if ($bcexRes && is_array($bRes) && $bRes['code']==0) {
                 $gateRes = json_encode($this->gateLib->sell('rating_eth', $sell_price, $count));
                 trace('bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes, 'error');
             }
