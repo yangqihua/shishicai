@@ -35,12 +35,12 @@ class Gate extends Api
     public function ban_zhuan()
     {
         $data = array_merge($this->get_bcex_ask_bid(), $this->get_gate_ask_bid());
-        if ($data['gate_ask_price']*1.013 < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
+        if ($data['gate_ask_price']*1.023 < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
             $data['remark'] = 'bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
             $data['order_count'] = min($data['gate_ask_count'], $data['bcex_bid_count']);
 //            $this->order_gate_bcex(1, 700, $data['gate_ask_price'], $data['bcex_bid_price']);
             $this->order_gate_bcex(1, $data['order_count'], $data['gate_ask_price'], $data['bcex_bid_price']);
-        } else if ($data['bcex_ask_price']*1.013 < $data['gate_bid_price']) {
+        } else if ($data['bcex_ask_price']*1.023 < $data['gate_bid_price']) {
             $data['remark'] = 'gate_bid 买方比 bcex 卖方多' . ((round($data['gate_bid_price'] / $data['bcex_ask_price'], 4) - 1) * 100) . '%';
             $data['order_count'] = min($data['bcex_ask_count'], $data['gate_bid_count']);
 //            $this->order_gate_bcex(2, 700, $data['bcex_ask_price'], $data['gate_bid_price']);
@@ -58,8 +58,8 @@ class Gate extends Api
             trace('下单数量: ' . $count . '小于500，不能下单', 'error');
             return;
         }
-        if ($count > 2000) {
-            $count = 2000;
+        if ($count > 5000) {
+            $count = 5000;
         }
         // gate 买，bcex卖
         if ($type === 1) {
