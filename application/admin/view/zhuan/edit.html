@@ -1,0 +1,46 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label for="c-gate_ask" class="control-label col-xs-12 col-sm-2">{:__('Gate_ask')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-gate_ask" class="form-control" name="row[gate_ask]" type="text" value="{$row.gate_ask}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-bcex_ask" class="control-label col-xs-12 col-sm-2">{:__('Bcex_ask')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-bcex_ask" class="form-control" name="row[bcex_ask]" type="text" value="{$row.bcex_ask}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-gate_bid" class="control-label col-xs-12 col-sm-2">{:__('Gate_bid')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-gate_bid" class="form-control" name="row[gate_bid]" type="text" value="{$row.gate_bid}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-bcex_bid" class="control-label col-xs-12 col-sm-2">{:__('Bcex_bid')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-bcex_bid" class="form-control" name="row[bcex_bid]" type="text" value="{$row.bcex_bid}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-remark" class="control-label col-xs-12 col-sm-2">{:__('Remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-remark" class="form-control" name="row[remark]" type="text" value="{$row.remark}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-order_count" class="control-label col-xs-12 col-sm-2">{:__('Order_count')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-order_count" class="form-control" name="row[order_count]" type="text" value="{$row.order_count}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
