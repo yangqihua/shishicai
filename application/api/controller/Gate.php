@@ -30,6 +30,19 @@ class Gate extends Api
         parent::_initialize();
     }
 
+    public function ban_zhuan(){
+        $url = 'https://www.bcex.top/Api_Order/depth';
+        $json = Http::post($url,['symbol'=>'rating2eth']);
+        if(!$json){
+            $json = Http::post($url,['symbol'=>'rating2eth']);
+        }
+        $bcexResult = json_decode($json,true);
+//        return json($bcexResult);
+        $bcexAsks1 = $bcexResult['data']['asks'][count($bcexResult['data']['asks'])-1]; // 卖1
+        $bidsAsks1 = $bcexResult['data']['bids'][0];  // 买1
+        return json(['$bcexAsks1'=>$bcexAsks1,'$bidsAsks1'=>$bidsAsks1]);
+    }
+
     public function get_ticker()
     {
         $result = $this->gateLib->get_ticker('rating_usdt');
