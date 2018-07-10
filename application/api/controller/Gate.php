@@ -35,16 +35,14 @@ class Gate extends Api
     public function ban_zhuan()
     {
         $data = array_merge($this->get_bcex_ask_bid(), $this->get_gate_ask_bid());
-        if ($data['gate_ask_price']*1.023 < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
+        if ($data['gate_ask_price'] < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
             $data['remark'] = 'bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
             $data['order_count'] = min($data['gate_ask_count'], $data['bcex_bid_count']);
-//            $this->order_gate_bcex(1, 700, $data['gate_ask_price'], $data['bcex_bid_price']);
-            $this->order_gate_bcex(1, $data['order_count'], $data['gate_ask_price'], $data['bcex_bid_price']);
-        } else if ($data['bcex_ask_price']*1.023 < $data['gate_bid_price']) {
+            $data = array_merge($data,$this->order_gate_bcex(1, $data['order_count'], $data['gate_ask_price'], $data['bcex_bid_price']));
+        } else if ($data['bcex_ask_price'] < $data['gate_bid_price']) {
             $data['remark'] = 'gate_bid 买方比 bcex 卖方多' . ((round($data['gate_bid_price'] / $data['bcex_ask_price'], 4) - 1) * 100) . '%';
             $data['order_count'] = min($data['bcex_ask_count'], $data['gate_bid_count']);
-//            $this->order_gate_bcex(2, 700, $data['bcex_ask_price'], $data['gate_bid_price']);
-            $this->order_gate_bcex(2, $data['order_count'], $data['bcex_ask_price'], $data['gate_bid_price']);
+            $data = array_merge($data,$this->order_gate_bcex(2, $data['order_count'], $data['bcex_ask_price'], $data['gate_bid_price']));
         }
         $zhuanModel = new Zhuan();
         $zhuanModel->allowField(true)->save($data);
@@ -54,13 +52,26 @@ class Gate extends Api
     // type :1 代表gate买，bcex卖，2反之
     private function order_gate_bcex($type, $count, $buy_price, $sell_price)
     {
+        $data = ['get_eth'=>0,'order_result'=>''];
+        $percent = round($sell_price / $buy_price, 4) - 1;
+        if ($percent < 0.023) {
+            $order_result = '买卖比例: ' . $percent . '小于0.023，不能下单';
+            trace($order_result, 'error');
+            $data['order_result'] = $order_result;
+            return $data;
+        }
         if ($count < 500) {
-            trace('下单数量: ' . $count . '小于500，不能下单', 'error');
-            return;
+            $order_result = '下单数量: ' . $count . '小于500，不能下单';
+            trace($order_result, 'error');
+            $data['order_result'] = $order_result;
+            return $data;
         }
-        if ($count > 5000) {
-            $count = 5000;
+        if ($percent < 0.03) {
+            $count = min($count, 6000);
+        } else if ($percent > 0.05) {
+            $count = min($count, 10000);
         }
+
         // gate 买，bcex卖
         if ($type === 1) {
             $tryCount = 1;
@@ -68,10 +79,13 @@ class Gate extends Api
             while (!$bcexRes && $tryCount++ < 5) {
                 $bcexRes = $this->order_bcex('sale', $sell_price, $count);
             }
-            $bRes = json_decode($bcexRes,true);
-            if ($bcexRes && is_array($bRes) && $bRes['code']==0) {
+            $bRes = json_decode($bcexRes, true,JSON_UNESCAPED_UNICODE);
+            if ($bcexRes && is_array($bRes) && $bRes['code'] == 0) {
                 $gateRes = json_encode($this->gateLib->buy('rating_eth', $buy_price, $count));
-                trace('bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes, 'error');
+                $order_result = 'bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes;
+                trace($order_result, 'error');
+                $data['get_eth'] = $count * ($sell_price - $buy_price);
+                $data['order_result'] = $order_result;
             }
         } else {
             $tryCount = 1;
@@ -79,12 +93,16 @@ class Gate extends Api
             while (!$bcexRes && $tryCount++ < 5) {
                 $bcexRes = $this->order_bcex('buy', $buy_price, $count);
             }
-            $bRes = json_decode($bcexRes,true);
-            if ($bcexRes && is_array($bRes) && $bRes['code']==0) {
+            $bRes = json_decode($bcexRes, true,JSON_UNESCAPED_UNICODE);
+            if ($bcexRes && is_array($bRes) && $bRes['code'] == 0) {
                 $gateRes = json_encode($this->gateLib->sell('rating_eth', $sell_price, $count));
-                trace('bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes, 'error');
+                $order_result = 'bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes;
+                trace($order_result, 'error');
+                $data['get_eth'] = $count * ($sell_price - $buy_price);
+                $data['order_result'] = $order_result;
             }
         }
+        return $data;
     }
 
     private function order_bcex($type, $price, $number)
