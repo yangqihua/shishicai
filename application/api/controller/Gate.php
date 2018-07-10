@@ -37,13 +37,11 @@ class Gate extends Api
         $data = array_merge($this->get_bcex_ask_bid(), $this->get_gate_ask_bid());
         if ($data['gate_ask_price'] < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
             $order_count = min($data['gate_ask_count'], $data['bcex_bid_count']);
-            $data['remark'] = 'bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%'.
-            '可下单:'.$order_count.'个';
+            $data['remark'] = '可下单:'.$order_count.'个,bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
             $data = array_merge($data,$this->order_gate_bcex(1, $order_count, $data['gate_ask_price'], $data['bcex_bid_price']));
         } else if ($data['bcex_ask_price'] < $data['gate_bid_price']) {
             $order_count = min($data['bcex_ask_count'], $data['gate_bid_count']);
-            $data['remark'] = 'gate_bid 买方比 bcex 卖方多' . ((round($data['gate_bid_price'] / $data['bcex_ask_price'], 4) - 1) * 100) . '%'.
-                '可下单:'.$order_count.'个';
+            $data['remark'] = '可下单:'.$order_count.'个,gate_bid 买方比 bcex 卖方多' . ((round($data['gate_bid_price'] / $data['bcex_ask_price'], 4) - 1) * 100) . '%';
             $data = array_merge($data,$this->order_gate_bcex(2, $order_count, $data['bcex_ask_price'], $data['gate_bid_price']));
         }
         $zhuanModel = new Zhuan();

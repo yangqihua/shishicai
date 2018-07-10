@@ -29,10 +29,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'bcex_ask', title: __('Bcex_ask')},
                         {field: 'gate_bid', title: __('Gate_bid')},
                         {field: 'bcex_bid', title: __('Bcex_bid')},
-                        {field: 'get_eth', title: 'ETH盈利'},
-                        {field: 'order_result', title: '下单返回状态'},
                         {field: 'remark', title: __('Remark')},
                         {field: 'order_count', title: __('Order_count')},
+                        {field: 'get_eth', title: 'ETH盈利'},
+                        {field: 'order_result', title: '下单返回状态'},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'updatetime', title: __('Updatetime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
