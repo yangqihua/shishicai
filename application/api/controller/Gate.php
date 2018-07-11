@@ -37,12 +37,12 @@ class Gate extends Api
         $data = array_merge($this->get_bcex_ask_bid(), $this->get_gate_ask_bid());
         if ($data['gate_ask_price'] < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
             $order_count = min($data['gate_ask_count'], $data['bcex_bid_count']);
-            $data['remark'] = '可下单:'.$order_count.'个,bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
-            $data = array_merge($data,$this->order_gate_bcex(1, $order_count, $data['gate_ask_price'], $data['bcex_bid_price']));
+            $data['remark'] = '可下单:' . $order_count . '个,bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
+            $data = array_merge($data, $this->order_gate_bcex(1, $order_count, $data['gate_ask_price'], $data['bcex_bid_price']));
         } else if ($data['bcex_ask_price'] < $data['gate_bid_price']) {
             $order_count = min($data['bcex_ask_count'], $data['gate_bid_count']);
-            $data['remark'] = '可下单:'.$order_count.'个,gate_bid 买方比 bcex 卖方多' . ((round($data['gate_bid_price'] / $data['bcex_ask_price'], 4) - 1) * 100) . '%';
-            $data = array_merge($data,$this->order_gate_bcex(2, $order_count, $data['bcex_ask_price'], $data['gate_bid_price']));
+            $data['remark'] = '可下单:' . $order_count . '个,gate_bid 买方比 bcex 卖方多' . ((round($data['gate_bid_price'] / $data['bcex_ask_price'], 4) - 1) * 100) . '%';
+            $data = array_merge($data, $this->order_gate_bcex(2, $order_count, $data['bcex_ask_price'], $data['gate_bid_price']));
         }
         $zhuanModel = new Zhuan();
         $zhuanModel->allowField(true)->save($data);
@@ -52,7 +52,7 @@ class Gate extends Api
     // type :1 代表gate买，bcex卖，2反之
     private function order_gate_bcex($type, $count, $buy_price, $sell_price)
     {
-        $data = ['get_eth'=>0,'order_result'=>'','order_count'=>''];
+        $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => ''];
         $percent = round($sell_price / $buy_price, 4) - 1;
         if ($percent < 0.023) {
             $order_result = '买卖比例: ' . $percent . '小于0.023，不能下单';
@@ -79,7 +79,7 @@ class Gate extends Api
             while (!$bcexRes && $tryCount++ < 5) {
                 $bcexRes = $this->order_bcex('sale', $sell_price, $count);
             }
-            $bRes = json_decode($bcexRes, true,JSON_UNESCAPED_UNICODE);
+            $bRes = json_decode($bcexRes, true, JSON_UNESCAPED_UNICODE);
             if ($bcexRes && is_array($bRes) && $bRes['code'] == 0) {
                 $gateRes = json_encode($this->gateLib->buy('rating_eth', $buy_price, $count));
                 $order_result = 'bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes;
@@ -94,7 +94,7 @@ class Gate extends Api
             while (!$bcexRes && $tryCount++ < 5) {
                 $bcexRes = $this->order_bcex('buy', $buy_price, $count);
             }
-            $bRes = json_decode($bcexRes, true,JSON_UNESCAPED_UNICODE);
+            $bRes = json_decode($bcexRes, true, JSON_UNESCAPED_UNICODE);
             if ($bcexRes && is_array($bRes) && $bRes['code'] == 0) {
                 $gateRes = json_encode($this->gateLib->sell('rating_eth', $sell_price, $count));
                 $order_result = 'bcex下单结果：' . $bcexRes . ',gate下单结果：' . $gateRes;
@@ -211,9 +211,69 @@ class Gate extends Api
     }
 
 
-    public function get_uex_and_gate()
+    public function get_max_rate($len = 3)
     {
-//        return json(['data'=>$result]);
+        $url = 'https://data.block.cc/api/v1/tickers';
+        $list = [];
+        for ($i = 0; $i < $len; $i++) {
+            $params = ['page' => $i + 1, 'size' => 100,'market'=>'gate,uex,bcex'];
+            $result = json_decode(Http::get($url, $params), true);
+            if (!$result) {
+                continue;
+            }
+            $list = array_merge($list, $result['data']['list']);
+            sleep(1);
+        }
+        $data = [];
+        foreach ($list as $item) {
+            $value = $item['last'];
+            if (key_exists($item['symbol_pair'], $data)) {
+                if (key_exists('max', $data[$item['symbol_pair']])) {
+                    $max = $data[$item['symbol_pair']]['max'];
+                    if (!key_exists('price', $max) || $value > $max['price']) {
+                        $data[$item['symbol_pair']]['max']['price'] = $value;
+                        $data[$item['symbol_pair']]['max']['market'] = $item['market'];
+                        $data[$item['symbol_pair']]['max']['vol'] = $item['vol'];
+                    }
+                } else {
+                    $data[$item['symbol_pair']]['max']['price'] = $value;
+                    $data[$item['symbol_pair']]['max']['market'] = $item['market'];
+                    $data[$item['symbol_pair']]['max']['vol'] = $item['vol'];
+                }
+
+                if (key_exists('min', $data[$item['symbol_pair']])) {
+                    $min = $data[$item['symbol_pair']]['min'];
+                    if (!key_exists('price', $min) || $value <= $min['price']) {
+                        $data[$item['symbol_pair']]['min']['price'] = $value;
+                        $data[$item['symbol_pair']]['min']['market'] = $item['market'];
+                        $data[$item['symbol_pair']]['min']['vol'] = $item['vol'];
+                    }
+                } else {
+                    $data[$item['symbol_pair']]['min']['price'] = $value;
+                    $data[$item['symbol_pair']]['min']['market'] = $item['market'];
+                    $data[$item['symbol_pair']]['min']['vol'] = $item['vol'];
+                }
+
+                if (key_exists('min', $data[$item['symbol_pair']]) && key_exists('max', $data[$item['symbol_pair']])) {
+                    $data[$item['symbol_pair']]['diff'] = $this->num(($data[$item['symbol_pair']]['max']['price'] / $data[$item['symbol_pair']]['min']['price']) - 1, 6) * 100;
+                }
+
+            } else {
+                $data[$item['symbol_pair']]['max'] = ['price' => $value, 'market' => $item['market'], 'vol' => $item['vol']];
+                $data[$item['symbol_pair']]['min'] = ['price' => $value, 'market' => $item['market'], 'vol' => $item['vol']];
+                $data[$item['symbol_pair']]['diff'] = 0;
+            }
+        }
+        uasort($data, array($this, 'cmp'));
+        return json(['data' => $data]);
+    }
+
+    private function cmp($a, $b)
+    {
+        if ($a['diff'] == $b['diff']) {
+            return 0;
+        }
+        return ($a['diff'] < $b['diff']) ? 1 : -1;
     }
 
     public function get_block()
@@ -263,7 +323,7 @@ class Gate extends Api
             $a = explode("e", strtolower($num));
             return bcmul($a[0], bcpow(10, $a[1], $double), $double);
         } else {
-            return $num;
+            return round($num, $double);
         }
     }
 
