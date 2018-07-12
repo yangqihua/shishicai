@@ -32,9 +32,13 @@ class Gate extends Api
         parent::_initialize();
     }
 
+    /**
+     *  order_status:1代表没有差价，2代表有差价，差价不足，3代表数量不够，4代表网络异常，不能成功下单，5代表成功下单
+     */
     public function ban_zhuan()
     {
         $data = array_merge($this->get_bcex_ask_bid(), $this->get_gate_ask_bid());
+        $data['order_status'] = 1;
         if ($data['gate_ask_price'] < $data['bcex_bid_price']) { // 此时去gate买，去bcex卖
             $order_count = min($data['gate_ask_count'], $data['bcex_bid_count']);
             $data['remark'] = '可下单:' . $order_count . '个,bcex_bid 买方比 gate 卖方多' . ((round($data['bcex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
@@ -52,18 +56,20 @@ class Gate extends Api
     // type :1 代表gate买，bcex卖，2反之
     private function order_gate_bcex($type, $count, $buy_price, $sell_price)
     {
-        $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => ''];
+        $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '','order_status'=>4];
         $percent = round($sell_price / $buy_price, 4) - 1;
         if ($percent < 0.023) {
             $order_result = '买卖比例: ' . $percent . '小于0.023，不能下单';
             trace($order_result, 'error');
             $data['order_result'] = $order_result;
+            $data['order_status'] = 2;
             return $data;
         }
         if ($count < 500) {
             $order_result = '下单数量: ' . $count . '小于500，不能下单';
             trace($order_result, 'error');
             $data['order_result'] = $order_result;
+            $data['order_status'] = 3;
             return $data;
         }
         if ($percent < 0.03) {
@@ -87,6 +93,7 @@ class Gate extends Api
                 $data['get_eth'] = $count * ($sell_price - $buy_price);
                 $data['order_result'] = $order_result;
                 $data['order_count'] = $count;
+                $data['order_status'] = 5;
             }
         } else {
             $tryCount = 1;
@@ -102,6 +109,7 @@ class Gate extends Api
                 $data['get_eth'] = $count * ($sell_price - $buy_price);
                 $data['order_result'] = $order_result;
                 $data['order_count'] = $count;
+                $data['order_status'] = 5;
             }
         }
         return $data;

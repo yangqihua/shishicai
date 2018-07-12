@@ -32,6 +32,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'remark', title: __('Remark')},
                         {field: 'order_count', title: __('Order_count')},
                         {field: 'get_eth', title: 'ETH盈利'},
+                        {field: 'order_status', title: '状态'},
                         {field: 'order_result', title: '下单返回状态'},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'updatetime', title: __('Updatetime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
