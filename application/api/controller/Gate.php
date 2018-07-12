@@ -32,10 +32,21 @@ class Gate extends Api
         parent::_initialize();
     }
 
+
+    public function ban_zhuan()
+    {
+        $cur_time = time();
+        for($i=0;$i<3;$i++){
+            $this->per_ban_zhuan();
+            sleep(10);
+        }
+        return json(['执行时间'=>(time()-$cur_time)]);
+    }
+
     /**
      *  order_status:1代表没有差价，2代表有差价，差价不足，3代表数量不够，4代表网络异常，不能成功下单，5代表成功下单
      */
-    public function ban_zhuan()
+    private function per_ban_zhuan()
     {
         $data = array_merge($this->get_bcex_ask_bid(), $this->get_gate_ask_bid());
         $data['order_status'] = 1;
@@ -56,7 +67,7 @@ class Gate extends Api
     // type :1 代表gate买，bcex卖，2反之
     private function order_gate_bcex($type, $count, $buy_price, $sell_price)
     {
-        $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '','order_status'=>4];
+        $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '', 'order_status' => 4];
         $percent = round($sell_price / $buy_price, 4) - 1;
         if ($percent < 0.023) {
             $order_result = '买卖比例: ' . $percent . '小于0.023，不能下单';
@@ -224,7 +235,7 @@ class Gate extends Api
         $url = 'https://data.block.cc/api/v1/tickers';
         $list = [];
         for ($i = 0; $i < $len; $i++) {
-            $params = ['page' => $i + 1, 'size' => 100,'market'=>'gate,uex,bcex'];
+            $params = ['page' => $i + 1, 'size' => 100, 'market' => 'gate,uex,bcex'];
             $result = json_decode(Http::get($url, $params), true);
             if (!$result) {
                 continue;
