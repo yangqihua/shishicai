@@ -20,6 +20,8 @@ class Gate extends Api
     private $gateLib;
     private $marketModel;
 
+    private $diffPrice = 0.00000002;
+
     public function __construct()
     {
         parent::__construct();
@@ -67,6 +69,9 @@ class Gate extends Api
     // type :1 代表gate买，bcex卖，2反之
     private function order_gate_bcex($type, $count, $buy_price, $sell_price)
     {
+        $buy_price += $this->diffPrice;
+        $sell_price += $this->diffPrice;
+
         $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '', 'order_status' => 4];
         $percent = round($sell_price / $buy_price, 4) - 1;
         if ($percent < 0.023) {
