@@ -148,9 +148,9 @@ class Gate extends Api
     public function ban_zhuan()
     {
         $cur_time = time();
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $this->per_ban_zhuan();
-            sleep(10);
+            sleep(15);
         }
         return json(['执行时间' => (time() - $cur_time)]);
     }
