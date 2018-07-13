@@ -35,6 +35,12 @@ class Gate extends Api
     }
 
 
+    public function ban_uex(){
+        $data = array_merge($this->get_uex_ask_bid(), $this->get_gate_ask_bid());
+        return json(['data'=>$data]);
+    }
+
+
     public function ban_zhuan()
     {
         $cur_time = time();
@@ -149,6 +155,27 @@ class Gate extends Api
         ];
         $result = Http::post($url, $params);
         return $result;
+    }
+
+    private function get_uex_ask_bid()
+    {
+        $dep_url = 'http://open-api.uex.com/open/api/market_dept';
+        $params = [
+            'symbol'=>'ratingeth',
+            'type' =>'step0',
+        ];
+        $result = json_decode(Http::get($dep_url,$params),true);
+
+        $result = $result['data']['tick'];
+        $uexAsks1 = $result['asks'][0]; // 卖1
+        $uexBids1 = $result['bids'][0];  // 买1
+        $gask = $this->num($uexAsks1[0]) . ',' . $uexAsks1[1];
+        $gbid = $this->num($uexBids1[0]) . ',' . $uexBids1[1];
+        return [
+            'uex_ask' => $gask, 'uex_bid' => $gbid,
+            'uex_ask_price' => $this->num($uexAsks1[0]), 'uex_ask_count' => $uexAsks1[1],
+            'uex_bid_price' => $this->num($uexBids1[0]), 'uex_bid_count' => $uexBids1[1],
+        ];
     }
 
     private function get_gate_ask_bid()
