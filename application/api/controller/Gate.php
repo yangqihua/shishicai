@@ -5,6 +5,7 @@ namespace app\api\controller;
 use app\admin\model\Block;
 use app\admin\model\GateOrder;
 use app\admin\model\Market;
+use app\admin\model\Uex;
 use app\admin\model\Zhuan;
 use app\common\controller\Api;
 use app\common\library\GateLib;
@@ -35,20 +36,123 @@ class Gate extends Api
     }
 
 
-    public function ban_uex(){
+    public function ban_uex()
+    {
         $data = array_merge($this->get_uex_ask_bid(), $this->get_gate_ask_bid());
-        return json(['data'=>$data]);
+        $data['order_status'] = 1;
+        if ($data['gate_ask_price'] < $data['uex_bid_price']) { // 此时去gate买，去uex卖
+            $order_count = min($data['gate_ask_count'], $data['uex_bid_count']);
+            $data['remark'] = '可下单:' . $order_count . '个,uex_bid 买方比 gate 卖方多' . ((round($data['uex_bid_price'] / $data['gate_ask_price'], 4) - 1) * 100) . '%';
+            $data = array_merge($data, $this->order_gate_uex(1, $order_count, $data['gate_ask_price'], $data['uex_bid_price']));
+        } else if ($data['uex_ask_price'] < $data['gate_bid_price']) {
+            $order_count = min($data['uex_ask_count'], $data['gate_bid_count']);
+            $data['remark'] = '可下单:' . $order_count . '个,gate_bid 买方比 uex 卖方多' . ((round($data['gate_bid_price'] / $data['uex_ask_price'], 4) - 1) * 100) . '%';
+            $data = array_merge($data, $this->order_gate_uex(2, $order_count, $data['uex_ask_price'], $data['gate_bid_price']));
+        }
+        $zhuanModel = new Uex();
+        $zhuanModel->allowField(true)->save($data);
+        return json(['data' => $data]);
     }
 
+    private function order_gate_uex($type, $count, $buy_price, $sell_price)
+    {
+        $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '', 'order_status' => 4];
+        $percent = round($sell_price / $buy_price, 4) - 1;
+        if ($percent < 0.023) {
+            $order_result = '买卖比例: ' . $percent . '小于0.023，不能下单';
+            trace($order_result, 'error');
+            $data['order_result'] = $order_result;
+            $data['order_status'] = 2;
+            return $data;
+        }
+        if ($count < 500) {
+            $order_result = '下单数量: ' . $count . '小于500，不能下单';
+            trace($order_result, 'error');
+            $data['order_result'] = $order_result;
+            $data['order_status'] = 3;
+            return $data;
+        }
+        if ($percent < 0.03) {
+            $count = min($count, 6000);
+        } else if ($percent < 0.05) {
+            $count = min($count, 10000);
+        }
+
+        // gate 买，uex卖
+        if ($type === 1) {
+            $tryCount = 1;
+            $uexRes = $this->order_uex('SELL', $sell_price, $count);
+            while (!$uexRes && $tryCount++ < 5) {
+                $uexRes = $this->order_uex('SELL', $sell_price, $count);
+            }
+            $bRes = json_decode($uexRes, true, JSON_UNESCAPED_UNICODE);
+            if ($uexRes && is_array($bRes) && $bRes['code'] == 0) {
+                $gateRes = json_encode($this->gateLib->buy('rating_eth', $buy_price, $count));
+                $order_result = 'uex下单结果：' . $uexRes . ',gate下单结果：' . $gateRes;
+                trace($order_result, 'error');
+                $data['get_eth'] = $count * ($sell_price - $buy_price);
+                $data['order_result'] = $order_result;
+                $data['order_count'] = $count;
+                $data['order_status'] = 5;
+            }
+        } else {
+            $tryCount = 1;
+            $uexRes = $this->order_uex('BUY', $buy_price, $count);
+            while (!$uexRes && $tryCount++ < 5) {
+                $uexRes = $this->order_uex('BUY', $buy_price, $count);
+            }
+            $bRes = json_decode($uexRes, true, JSON_UNESCAPED_UNICODE);
+            if ($uexRes && is_array($bRes) && $bRes['code'] == 0) {
+                $gateRes = json_encode($this->gateLib->sell('rating_eth', $sell_price, $count));
+                $order_result = 'uex下单结果：' . $uexRes . ',gate下单结果：' . $gateRes;
+                trace($order_result, 'error');
+                $data['get_eth'] = $count * ($sell_price - $buy_price);
+                $data['order_result'] = $order_result;
+                $data['order_count'] = $count;
+                $data['order_status'] = 5;
+            }
+        }
+        return $data;
+    }
+
+    public function test_uex(){
+        $result = $this->order_uex('BUY',0.00000554,800);
+        return $result;
+    }
+
+    private function order_uex($type, $price, $number)
+    {
+        $url = 'http://open-api.uex.com/open/api/create_order';
+        $config = new Config();
+        $keyResult = $config->where("name", "uex_secret")->find();
+        $uex_secret = $keyResult['value'];
+        $keyResult = $config->where("name", "uex_password")->find();
+        $uex_password = $keyResult['value'];
+        $str = 'country86mobile18428360735password' . $uex_password . 'ztime' . time();
+        $sign = md5($str . $uex_secret);
+        $params = [
+            'side' => $type,
+            'type' =>1,
+            'volume'=>$number,
+            'price'=>$price,
+            'symbol' => 'ratingeth',
+            'fee_is_user_exchange_coin'=>1,
+            'api_key' => '6cd08b7b45814de4649cc85ea26000b3',
+            'time' => time(),
+            'sign' => $sign,
+        ];
+        $result = Http::post($url, $params);
+        return $result;
+    }
 
     public function ban_zhuan()
     {
         $cur_time = time();
-        for($i=0;$i<3;$i++){
+        for ($i = 0; $i < 3; $i++) {
             $this->per_ban_zhuan();
             sleep(10);
         }
-        return json(['执行时间'=>(time()-$cur_time)]);
+        return json(['执行时间' => (time() - $cur_time)]);
     }
 
     /**
@@ -75,8 +179,8 @@ class Gate extends Api
     // type :1 代表gate买，bcex卖，2反之
     private function order_gate_bcex($type, $count, $buy_price, $sell_price)
     {
-        $buy_price += $this->diffPrice;
-        $sell_price += $this->diffPrice;
+//        $buy_price += $this->diffPrice;
+//        $sell_price += $this->diffPrice;
 
         $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '', 'order_status' => 4];
         $percent = round($sell_price / $buy_price, 4) - 1;
@@ -96,7 +200,7 @@ class Gate extends Api
         }
         if ($percent < 0.03) {
             $count = min($count, 6000);
-        } else if ($percent > 0.05) {
+        } else if ($percent < 0.05) {
             $count = min($count, 10000);
         }
 
@@ -161,10 +265,10 @@ class Gate extends Api
     {
         $dep_url = 'http://open-api.uex.com/open/api/market_dept';
         $params = [
-            'symbol'=>'ratingeth',
-            'type' =>'step0',
+            'symbol' => 'ratingeth',
+            'type' => 'step0',
         ];
-        $result = json_decode(Http::get($dep_url,$params),true);
+        $result = json_decode(Http::get($dep_url, $params), true);
 
         $result = $result['data']['tick'];
         $uexAsks1 = $result['asks'][0]; // 卖1
