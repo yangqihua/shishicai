@@ -61,6 +61,21 @@ if (!function_exists('datetime')) {
 
 }
 
+if (!function_exists('num_format')) {
+
+    function num_format($num, $double = 8)
+    {
+        if (false !== stripos($num, "e")) {
+            $a = explode("e", strtolower($num));
+            return bcmul($a[0], bcpow(10, $a[1], $double), $double);
+        } else {
+            $data = sprintf('%.'.$double.'f',$num);
+            return $data;
+        }
+    }
+
+}
+
 if (!function_exists('human_date')) {
 
     /**
