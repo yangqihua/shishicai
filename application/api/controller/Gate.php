@@ -116,19 +116,19 @@ class Gate extends Api
     }
 
     public function test_uex(){
-        $result = $this->order_uex('BUY',0.00000554,800);
+        $result = $this->order_uex('BUY',0.00000469,800);
         return $result;
     }
 
     private function order_uex($type, $price, $number)
     {
-        $url = 'http://open-api.uex.com/open/api/create_order';
+        $url = 'https://open-api.uex.com/open/api/create_order';
         $config = new Config();
         $keyResult = $config->where("name", "uex_secret")->find();
         $uex_secret = $keyResult['value'];
         $keyResult = $config->where("name", "uex_password")->find();
         $uex_password = $keyResult['value'];
-        $str = 'country86mobile18428360735password' . $uex_password . 'ztime' . time();
+        $str = 'country86mobile18428360735password' . $uex_password . 'time' . time();
         $sign = md5($str . $uex_secret);
         $params = [
             'side' => $type,
@@ -141,7 +141,14 @@ class Gate extends Api
             'time' => time(),
             'sign' => $sign,
         ];
-        $result = Http::post($url, $params);
+
+        $header = [
+            'content-type' => 'application/x-www-form-urlencoded',
+        ];
+        $options = [
+            CURLOPT_HTTPHEADER => $header
+        ];
+        $result = Http::post($url, $params,$options);
         return $result;
     }
 
@@ -184,8 +191,8 @@ class Gate extends Api
 
         $data = ['get_eth' => 0, 'order_result' => '', 'order_count' => '', 'order_status' => 4];
         $percent = round($sell_price / $buy_price, 4) - 1;
-        if ($percent < 0.023) {
-            $order_result = '买卖比例: ' . $percent . '小于0.023，不能下单';
+        if ($percent < 0.020) {
+            $order_result = '买卖比例: ' . $percent . '小于0.020，不能下单';
             trace($order_result, 'error');
             $data['order_result'] = $order_result;
             $data['order_status'] = 2;
@@ -263,7 +270,7 @@ class Gate extends Api
 
     private function get_uex_ask_bid()
     {
-        $dep_url = 'http://open-api.uex.com/open/api/market_dept';
+        $dep_url = 'https://open-api.uex.com/open/api/market_dept';
         $params = [
             'symbol' => 'ratingeth',
             'type' => 'step0',
