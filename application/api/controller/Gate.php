@@ -155,7 +155,7 @@ class Gate extends Api
     public function ban_zhuan()
     {
         $cur_time = time();
-        for ($i = 0; $i < 2; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             $this->per_ban_zhuan();
             sleep(15);
         }
@@ -206,9 +206,9 @@ class Gate extends Api
             return $data;
         }
         if ($percent < 0.03) {
-            $count = min($count, 6000);
+            $count = min($count, 8000);
         } else if ($percent < 0.05) {
-            $count = min($count, 10000);
+            $count = min($count, 12000);
         }
 
         // gate 买，bcex卖
