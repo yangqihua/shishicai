@@ -2,12 +2,14 @@
 
 namespace app\api\controller;
 
+use app\admin\model\Balance;
 use app\admin\model\Block;
 use app\admin\model\GateOrder;
 use app\admin\model\Market;
 use app\admin\model\Uex;
 use app\admin\model\Zhuan;
 use app\common\controller\Api;
+use app\common\library\BuexLib;
 use app\common\library\GateLib;
 use app\common\model\Config;
 use fast\Http;
@@ -19,11 +21,13 @@ class Rating extends Api
     protected $noNeedRight = '*';
 
     private $gateLib;
+    private $buexLib;
 
     public function __construct()
     {
         parent::__construct();
         $this->gateLib = new GateLib();
+        $this->buexLib = new BuexLib();
     }
 
     public function _initialize()
@@ -32,26 +36,24 @@ class Rating extends Api
     }
 
 
-    // bcex 账户
-    public function bcex_user_balance(){
-        $url = 'https://www.bcex.top/Api_User/userBalance';
-        $config = new Config();
-        $keyResult = $config->where("name", "bcex_pub")->find();
-        $bcex_pub = $keyResult['value'];
-        $keyResult = $config->where("name", "bcex_pri")->find();
-        $bcex_pri = $keyResult['value'];
-        $params = [
-            'api_key' => $bcex_pub,
-            'sign' => md5('api_key=' . $bcex_pub . '&secret_key=' . $bcex_pri),
-        ];
-        $result = json_decode(Http::post($url, $params),true);
-        $data = [];
-        foreach($result['data'] as $key => $value){
-            $temp = num_format($value,8);
-            if($temp != '0.00000000'){
-                $data[$key]=num_format($value,4);
-            }
-        }
+    public function get_balance(){
+        $eth_ticker = $this->gateLib->get_ticker('eth_usdt');
+        $rating_ticker = $this->gateLib->get_ticker('rating_eth');
+        $data['eth_price'] = $eth_ticker['last']*6.67;
+        $data['rating_price'] = $rating_ticker['last'];
+
+        $gate_balance = $this->gateLib->get_balances();
+        $buex_balance = $this->buexLib->bcex_user_balance();
+        $data['eth'] = $gate_balance['available']['ETH']+$buex_balance['eth_over'];
+        $data['locked_eth'] = $gate_balance['locked']['ETH']+$buex_balance['eth_lock'];
+        $data['rating'] = $gate_balance['available']['RATING']+$buex_balance['rating_over'];
+        $data['locked_rating'] = $gate_balance['locked']['RATING']+$buex_balance['rating_lock'];
+
+        $data['money'] = num_format(($data['eth']+$data['locked_eth']+($data['rating']+$data['locked_rating'])*$data['rating_price'])
+            *$data['eth_price'],2);
+
+        $balanceModel = new Balance();
+        $balanceModel->save($data);
         return json($data);
     }
 

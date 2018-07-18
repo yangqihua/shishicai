@@ -1,0 +1,40 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label for="c-rating" class="control-label col-xs-12 col-sm-2">{:__('Rating')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-rating" class="form-control" name="row[rating]" type="text" value="{$row.rating}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-eth" class="control-label col-xs-12 col-sm-2">{:__('Eth')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-eth" class="form-control" name="row[eth]" type="text" value="{$row.eth}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-money" class="control-label col-xs-12 col-sm-2">{:__('Money')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-money" class="form-control" name="row[money]" type="text" value="{$row.money}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-rating_price" class="control-label col-xs-12 col-sm-2">{:__('Rating_price')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-rating_price" class="form-control" name="row[rating_price]" type="text" value="{$row.rating_price}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-eth_price" class="control-label col-xs-12 col-sm-2">{:__('Eth_price')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-eth_price" class="form-control" name="row[eth_price]" type="text" value="{$row.eth_price}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
