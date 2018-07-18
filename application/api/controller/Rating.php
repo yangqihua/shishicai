@@ -49,8 +49,10 @@ class Rating extends Api
         $data['rating'] = $gate_balance['available']['RATING']+$buex_balance['rating_over'];
         $data['locked_rating'] = $gate_balance['locked']['RATING']+$buex_balance['rating_lock'];
 
-        $data['money'] = num_format(($data['eth']+$data['locked_eth']+($data['rating']+$data['locked_rating'])*$data['rating_price'])
-            *$data['eth_price'],2);
+        $data['total_eth'] = num_format($data['eth']+$data['locked_eth']+($data['rating']+$data['locked_rating'])*$data['rating_price'],4);
+        $data['total_rating'] = num_format($data['total_eth']/$data['rating_price'],4);
+
+        $data['money'] = num_format($data['total_eth']*$data['eth_price'],2);
 
         $balanceModel = new Balance();
         $balanceModel->save($data);
