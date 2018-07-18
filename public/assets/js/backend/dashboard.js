@@ -50,7 +50,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     // min: 0.000005,
                     // max: 0.000010,
                     type: 'value',
-                    // scale:true,
+                    scale:true,
                 },
                 dataZoom: [
                     {
