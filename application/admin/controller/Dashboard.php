@@ -24,17 +24,15 @@ class Dashboard extends Backend
     public function index()
     {
 
-        $resultList = [];
-//        $huiheModel = new PkHuihe();
-//        $dataList = $huiheModel->select();
-//        foreach ($dataList as $key => $item){
-//            $qiString = $item['qihaos'];
-//            $qihaoArr = explode(',',$qiString);
-//            for($i=0;$i<count($qihaoArr);$i++){
-//                $qihao = preg_replace('/\(.*?\)/', '', $qihaoArr[$i]);
-//                $resultList[$qihao][$item['wei']][$item['type']] = $i+1;
-//            }
-//        }
+        $result = Db::table('balance')->select();
+        $balanceList['eth_rate'] = $result[0]['money']/$result[0]['total_eth'];
+        $balanceList['rating_rate'] = $result[0]['money']/$result[0]['total_rating'];
+        foreach ($result as $item){
+            $balanceList['time'][] = datetime($item['createtime']);
+            $balanceList['money'][] = $item['money'];
+            $balanceList['eth'][] = $item['total_eth']*$balanceList['eth_rate'];
+            $balanceList['rating'][] = $item['total_rating']*$balanceList['rating_rate'];
+        }
 
 
         $result = Db::table('block')->column('createtime,gate_last,bcex_last,uex_last,coinoah_last,hotbit_last');
@@ -47,7 +45,7 @@ class Dashboard extends Backend
             $marketList['coinoah'][] = $item['coinoah_last'];
             $marketList['hotbit'][] = $item['hotbit_last'];
         }
-        $this->view->assign(['marketList'=>$marketList]);
+        $this->view->assign(['marketList'=>$marketList,'balanceList'=>$balanceList]);
         return $this->view->fetch();
     }
 
