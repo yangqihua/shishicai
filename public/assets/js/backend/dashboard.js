@@ -23,7 +23,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                                 result += isNaN(item.value) ? 0 : item.value / balanceList['eth_rate'];
                             } else if (item.seriesName === 'rating') {
                                 result += isNaN(item.value) ? 0 : item.value / balanceList['rating_rate'];
-                            } else {
+                            } else if (item.seriesName === 'cur_eth') {
+                                result += isNaN(item.value) ? 0 : item.value / balanceList['cur_eth'];
+                            } else if (item.seriesName === 'cur_rating') {
+                                result += isNaN(item.value) ? 0 : item.value / balanceList['cur_rating'];
+                            } else{
                                 result += isNaN(item.value) ? 0 : item.value;
                             }
                         });
@@ -31,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     }
                 },
                 legend: {
-                    data: ['money', 'eth', 'rating']
+                    data: ['money', 'eth', 'rating','cur_eth','cur_rating']
                 },
                 grid: {
                     "bottom": 100,
@@ -93,6 +97,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                         name: 'rating',
                         type: 'line',
                         data: balanceList['rating']
+                    },
+                    {
+                        name: 'cur_eth',
+                        type: 'line',
+                        data: balanceList['cur_eth']
+                    },
+                    {
+                        name: 'cur_rating',
+                        type: 'line',
+                        data: balanceList['cur_rating']
                     },
                 ]
             };

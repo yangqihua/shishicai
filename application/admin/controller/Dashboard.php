@@ -27,11 +27,15 @@ class Dashboard extends Backend
         $result = Db::table('balance')->select();
         $balanceList['eth_rate'] = $result[0]['money']/$result[0]['total_eth'];
         $balanceList['rating_rate'] = $result[0]['money']/$result[0]['total_rating'];
+        $balanceList['cur_eth_rate'] = $result[0]['money']/($result[0]['eth']+num_format($result[0]['locked_rating']*$result[0]['rating_price'],4));
+        $balanceList['cur_rating_rate'] = $result[0]['money']/($result[0]['rating']+num_format($result[0]['locked_eth']/$result[0]['rating_price'],4));
         foreach ($result as $item){
             $balanceList['time'][] = datetime($item['createtime']);
             $balanceList['money'][] = $item['money'];
             $balanceList['eth'][] = $item['total_eth']*$balanceList['eth_rate'];
             $balanceList['rating'][] = $item['total_rating']*$balanceList['rating_rate'];
+            $balanceList['cur_eth'][] = ($item['eth']+num_format($item['locked_rating']*$item['rating_price'],4))*$balanceList['cur_eth_rate'];
+            $balanceList['cur_rating'][] = ($item['rating']+num_format($item['locked_eth']/$item['rating_price'],4))*$balanceList['cur_rating_rate'];
         }
 
 
@@ -47,32 +51,6 @@ class Dashboard extends Backend
         }
         $this->view->assign(['marketList'=>$marketList,'balanceList'=>$balanceList]);
         return $this->view->fetch();
-    }
-
-
-    public function get_one_day()
-    {
-        $result = [];
-
-        $fmt = "'%Y-%m-%d %H'";
-
-        $sql = "SELECT FROM_UNIXTIME(createtime, $fmt) as create_time,count(FROM_UNIXTIME(createtime, $fmt)) as total FROM shishicai.pk_huihe group by create_time;";
-        $res = Db::query($sql);
-        foreach ($res as $row) {
-            $result[$row['create_time']] = ['total_num' => $row['total']];
-        }
-
-        $sql = "SELECT FROM_UNIXTIME(createtime, $fmt) as create_time,count(FROM_UNIXTIME(createtime,$fmt)) as total,repeat_num FROM shishicai.pk_huihe where repeat_num=1 group by create_time,repeat_num;";
-        $res = Db::query($sql);
-        $total_reward = 0;
-        foreach ($res as $row) {
-            $result[$row['create_time']]['yi_num'] = $row['total'];
-            $result[$row['create_time']]['reward'] = $row['total'] * 2 * $this->rate - $result[$row['create_time']]['total_num'];
-            $total_reward += $row['total'] * 2 * $this->rate - $result[$row['create_time']]['total_num'];
-        }
-        $data['result'] = $result;
-        $data['total_reward'] = $total_reward;
-        return $data;
     }
 
 }
