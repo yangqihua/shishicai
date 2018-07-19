@@ -24,9 +24,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                             } else if (item.seriesName === 'rating') {
                                 result += isNaN(item.value) ? 0 : item.value / balanceList['rating_rate'];
                             } else if (item.seriesName === 'cur_eth') {
-                                result += isNaN(item.value) ? 0 : item.value / balanceList['cur_eth'];
+                                result += isNaN(item.value) ? 0 : item.value / balanceList['cur_eth_rate'];
                             } else if (item.seriesName === 'cur_rating') {
-                                result += isNaN(item.value) ? 0 : item.value / balanceList['cur_rating'];
+                                result += isNaN(item.value) ? 0 : item.value / balanceList['cur_rating_rate'];
                             } else{
                                 result += isNaN(item.value) ? 0 : item.value;
                             }
