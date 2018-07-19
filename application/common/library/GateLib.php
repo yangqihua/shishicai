@@ -346,6 +346,24 @@ class GateLib
         );
     }
 
+    public function get_ask_bid($symbol)
+    {
+        $symbol = $symbol.'_eth';
+        $gateResult = $this->get_orderbook($symbol);
+        $gateAsks1 = $gateResult['asks'][count($gateResult['asks']) - 1]; // 卖1
+        $gateBids1 = $gateResult['bids'][0];  // 买1
+        $gask = num_format($gateAsks1[0]) . ',' . $gateAsks1[1];
+        $gbid = num_format($gateBids1[0]) . ',' . $gateBids1[1];
+        return [
+            'gate_ask' => $gask,
+            'gate_bid' => $gbid,
+            'gate_ask_price' => num_format($gateAsks1[0]),
+            'gate_ask_count' => $gateAsks1[1],
+            'gate_bid_price' => num_format($gateBids1[0]),
+            'gate_bid_count' => $gateBids1[1],
+        ];
+    }
+
 //try {
 
     /*** public API methods examples ***/
