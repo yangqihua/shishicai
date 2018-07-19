@@ -69,6 +69,15 @@ class BuexLib
         ];
     }
 
+    public function get_pairs(){
+        $result = json_decode(Http::get('https://www.bcex.top/Api_Market/getPriceList'),true);
+        $data = [];
+        foreach ($result['eth'] as $key=>$value){
+            $data[] = $value['coin_from'].'_'.$value['coin_to'];
+        }
+        return $data;
+    }
+
     // bcex 账户
     public function bcex_user_balance()
     {
