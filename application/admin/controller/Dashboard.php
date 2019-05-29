@@ -17,7 +17,6 @@ class Dashboard extends Backend
 {
 
     protected $rate = 0.995;
-    private $huiheMap = ['yi' => '冠军', 'er' => '亚军', 'san' => '第三名', 'si' => '第四名', 'wu' => '第五名', 'liu' => '第六名', 'qi' => '第七名', 'ba' => '第八名', 'jiu' => '第九名', 'shi' => '第十名',];
     /**
      * 查看
      */
@@ -39,7 +38,7 @@ class Dashboard extends Backend
         }
 
 
-        $result = Db::table('block')->column('createtime,gate_last,bcex_last,uex_last,coinoah_last,hotbit_last');
+        $result = Db::table('block')->column('createtime,gate_last,bcex_last,uex_last,coinoah_last,hotbit_last')->limit(1000);
         $marketList = [];
         foreach ($result as $item){
             $marketList['time'][] = date('Y-m-d H:i:s',$item['createtime']);
