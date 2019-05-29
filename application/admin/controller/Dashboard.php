@@ -38,7 +38,7 @@ class Dashboard extends Backend
         }
 
 
-        $result = Db::table('block')->column('createtime,gate_last,bcex_last,uex_last,coinoah_last,hotbit_last')->limit(1000);
+        $result = Db::table('block')->field('createtime,gate_last,bcex_last,uex_last,coinoah_last,hotbit_last')->limit(1000)->select();
         $marketList = [];
         foreach ($result as $item){
             $marketList['time'][] = date('Y-m-d H:i:s',$item['createtime']);
